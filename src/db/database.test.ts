@@ -69,6 +69,31 @@ describe('createRecord', () => {
     expect(person.created_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
     expect(person.updated_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
   })
+
+  it('keeps the id when one is given', async () => {
+    const person = await createRecord(db.people, { ...personValues(), id: 'my-own-id' })
+
+    expect(person.id).toBe('my-own-id')
+    expect((await db.people.get('my-own-id'))?.full_name).toBe('Meera Joshi')
+  })
+
+  it('gives a different id to every record', async () => {
+    const first = await createRecord(db.people, personValues())
+    const second = await createRecord(db.people, personValues())
+
+    expect(first.id).not.toBe(second.id)
+  })
+
+  it('keeps the times when they are given', async () => {
+    const person = await createRecord(db.people, {
+      ...personValues(),
+      created_at: '2020-01-01T00:00:00.000Z',
+      updated_at: '2020-01-02T00:00:00.000Z',
+    })
+
+    expect(person.created_at).toBe('2020-01-01T00:00:00.000Z')
+    expect(person.updated_at).toBe('2020-01-02T00:00:00.000Z')
+  })
 })
 
 describe('updateRecord', () => {
@@ -110,6 +135,11 @@ describe('updateRecord', () => {
     expect(updated?.id).toBe(person.id)
     expect(updated?.created_at).toBe(person.created_at)
   })
+
+  it('gives nothing back when the record is not there', async () => {
+    const result = await updateRecord(db.people, 'no-such-id', { city: 'Borli' })
+    expect(result).toBeUndefined()
+  })
 })
 
 describe('softDeleteRecord', () => {
@@ -131,6 +161,11 @@ describe('softDeleteRecord', () => {
 
     const restored = await db.people.get(person.id)
     expect(restored?.deleted).toBe(false)
+  })
+
+  it('gives nothing back when the record is not there', async () => {
+    expect(await softDeleteRecord(db.people, 'no-such-id')).toBeUndefined()
+    expect(await restoreRecord(db.people, 'no-such-id')).toBeUndefined()
   })
 })
 

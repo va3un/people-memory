@@ -36,6 +36,7 @@ export class PeopleDatabase extends Dexie {
 export const db = new PeopleDatabase()
 
 // The "Me" person is the only record with is_me set.
+// Deleted people are skipped, so a deleted Me does not come back.
 export async function findMe(): Promise<Person | undefined> {
-  return db.people.filter((person) => person.is_me).first()
+  return db.people.filter((person) => person.is_me && !person.deleted).first()
 }

@@ -60,6 +60,24 @@ describe('requestPersistentStorage', () => {
     const status = await requestPersistentStorage()
     expect(status.state).toBe('unsupported')
   })
+
+  it('says denied when the browser throws', async () => {
+    Object.defineProperty(globalThis.navigator, 'storage', {
+      configurable: true,
+      value: stubStorage({
+        persist: async () => {
+          throw new Error('blocked')
+        },
+        persisted: async () => {
+          throw new Error('blocked')
+        },
+      }),
+    })
+
+    const status = await requestPersistentStorage()
+    expect(status.state).toBe('denied')
+    expect(status.persisted).toBe(false)
+  })
 })
 
 describe('getStorageStatus', () => {
@@ -73,6 +91,27 @@ describe('getStorageStatus', () => {
     const status = await getStorageStatus()
     expect(status.persisted).toBe(true)
     expect(persist).not.toHaveBeenCalled()
+  })
+
+  it('says unsupported when the browser has no storage promise', async () => {
+    const status = await getStorageStatus()
+    expect(status.state).toBe('unsupported')
+    expect(status.persisted).toBe(false)
+  })
+
+  it('says denied when the browser throws', async () => {
+    Object.defineProperty(globalThis.navigator, 'storage', {
+      configurable: true,
+      value: stubStorage({
+        persisted: async () => {
+          throw new Error('blocked')
+        },
+      }),
+    })
+
+    const status = await getStorageStatus()
+    expect(status.state).toBe('denied')
+    expect(status.persisted).toBe(false)
   })
 })
 

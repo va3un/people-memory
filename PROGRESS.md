@@ -13,7 +13,7 @@ What was done
 - Settings now has a Developer tools card, marked "Test data only". It shows the count of every kind of record, a "Load sample data" button and a "Delete all data" button.
 - "Delete all data" cannot be done in one tap. A box opens and asks for the word DELETE. Nothing is really erased, every record is only marked as deleted.
 - Added the Airtable mapping rehearsal in `docs/AIRTABLE_MAPPING.md`, using invented column names so no private data is in this public repository.
-- Added 71 new tests. All 110 tests pass. Typecheck and build pass.
+- Added 80 new tests. All 119 tests pass. Typecheck and build pass.
 - Added `dexie@4.4.6` for the database and `fake-indexeddb@6.2.6` so the tests can use a pretend IndexedDB.
 
 Please test
@@ -33,6 +33,9 @@ Decisions I made
 - Counts ignore records marked as deleted, so the numbers show what is really in the app.
 - A person's name is squeezed into single spaces when the record is built, so "Meera   Joshi" is stored as "Meera Joshi". Names are matched this way in search later on.
 - Added a delete helper for capture batches, so every record type has the same create, update and soft delete set.
+- A deleted "Me" person is now ignored when the app looks for you, so a deleted Me does not reappear.
+- Creating a record now keeps the created_at and updated_at times when they are given, the same way it already kept a given id. This matters for the Airtable import in Phase 11, where old records should keep their real dates.
+- Fixed a test that could fail at random. It checked that updated_at changed, but a create and an update inside the same millisecond looked the same. The test now starts from an old date, so it always passes.
 
 Need from you
 - None. The Airtable rehearsal uses invented column names. If you remember the real column names from the old Airtable base, tell me and I will match them before Phase 11.

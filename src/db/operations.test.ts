@@ -55,13 +55,15 @@ describe('updatePerson', () => {
       phones: [],
       gender: 'male',
       is_me: false,
+      // An old time, so the refresh is always visible even in a fast test.
+      updated_at: '2020-01-01T00:00:00.000Z',
     })
 
     await updatePerson(person.id, { city: 'Borli' })
 
     const saved = await db.people.get(person.id)
     expect(saved?.city).toBe('Borli')
-    expect(saved?.updated_at).not.toBe(person.updated_at)
+    expect(saved?.updated_at).not.toBe('2020-01-01T00:00:00.000Z')
   })
 })
 

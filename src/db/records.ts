@@ -37,7 +37,7 @@ export async function createRecord<T extends BaseRecord>(
     ...values,
     id: values.id ?? newId(),
     created_at: values.created_at ?? now,
-    updated_at: now,
+    updated_at: values.updated_at ?? now,
     deleted: values.deleted ?? false,
   } as T
   await table.put(record)

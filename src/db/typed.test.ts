@@ -12,6 +12,7 @@ import {
   deleteContext,
   deleteDeviceSetting,
   deleteMembership,
+  deletePerson,
   deletePhoto,
   deleteRelationship,
   getDeviceSetting,
@@ -191,6 +192,13 @@ describe('findMe', () => {
   })
 
   it('gives nothing back when no one is marked as Me', async () => {
+    expect(await findMe()).toBeUndefined()
+  })
+
+  it('ignores a person who was marked as deleted', async () => {
+    const me = await createPerson({ ...personDefaults('Varun Sample'), is_me: true })
+    await deletePerson(me.id)
+
     expect(await findMe()).toBeUndefined()
   })
 })
