@@ -1,12 +1,21 @@
 import { APP_VERSION } from '../lib/appVersion'
 import { Card } from '../components/ui/Card'
 import { Chip } from '../components/ui/Chip'
+import { DeveloperTools } from '../components/settings/DeveloperTools'
+import { StorageCard } from '../components/settings/StorageCard'
 
 // The Settings screen. Sync and backup arrive in later phases.
 export function SettingsPage() {
   return (
     <main className="page mx-auto w-full max-w-md pb-28 pt-6">
       <h1 className="page-title">Settings</h1>
+
+      <section className="mt-6">
+        <p className="section-label">Storage</p>
+        <StorageCard />
+      </section>
+
+      <DeveloperTools />
 
       <section className="mt-6">
         <p className="section-label">About</p>
