@@ -6,6 +6,7 @@ import {
   newId,
   nowIso,
   restoreRecord,
+  softDeleteMany,
   softDeleteRecord,
   updateRecord,
 } from './records'
@@ -138,5 +139,40 @@ describe('nowIso', () => {
     const value = nowIso()
     expect(value.endsWith('Z')).toBe(true)
     expect(Math.abs(Date.now() - new Date(value).getTime())).toBeLessThan(5000)
+  })
+})
+
+describe('softDeleteMany', () => {
+  it('marks every given record as deleted and keeps them', async () => {
+    const first = await createRecord(db.people, personValues({ full_name: 'Anil Joshi' }))
+    const second = await createRecord(db.people, personValues({ full_name: 'Meera Joshi' }))
+    const untouched = await createRecord(db.people, personValues({ full_name: 'Ketaki Joshi' }))
+
+    const count = await softDeleteMany(db.people, [first.id, second.id])
+
+    expect(count).toBe(2)
+    expect((await db.people.get(first.id))?.deleted).toBe(true)
+    expect((await db.people.get(second.id))?.deleted).toBe(true)
+    expect((await db.people.get(untouched.id))?.deleted).toBe(false)
+  })
+
+  it('refreshes updated_at on the records it deletes', async () => {
+    const person = await createRecord(db.people, {
+      ...personValues(),
+      updated_at: '2020-01-01T00:00:00.000Z',
+    })
+
+    await softDeleteMany(db.people, [person.id])
+
+    expect((await db.people.get(person.id))?.updated_at).not.toBe('2020-01-01T00:00:00.000Z')
+  })
+
+  it('changes nothing when the list is empty', async () => {
+    const person = await createRecord(db.people, personValues())
+
+    const count = await softDeleteMany(db.people, [])
+
+    expect(count).toBe(0)
+    expect((await db.people.get(person.id))?.deleted).toBe(false)
   })
 })

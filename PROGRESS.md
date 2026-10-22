@@ -13,7 +13,7 @@ What was done
 - Settings now has a Developer tools card, marked "Test data only". It shows the count of every kind of record, a "Load sample data" button and a "Delete all data" button.
 - "Delete all data" cannot be done in one tap. A box opens and asks for the word DELETE. Nothing is really erased, every record is only marked as deleted.
 - Added the Airtable mapping rehearsal in `docs/AIRTABLE_MAPPING.md`, using invented column names so no private data is in this public repository.
-- Added 40 new tests. All 89 tests pass. Typecheck and build pass.
+- Added 71 new tests. All 110 tests pass. Typecheck and build pass.
 - Added `dexie@4.4.6` for the database and `fake-indexeddb@6.2.6` so the tests can use a pretend IndexedDB.
 
 Please test
@@ -31,6 +31,8 @@ Decisions I made
 - Accent removal only touches Latin letters. Removing accents from Devanagari would break the combining marks and break Hindi names.
 - The sample data uses fixed ids, so the tests can check the same people every time.
 - Counts ignore records marked as deleted, so the numbers show what is really in the app.
+- A person's name is squeezed into single spaces when the record is built, so "Meera   Joshi" is stored as "Meera Joshi". Names are matched this way in search later on.
+- Added a delete helper for capture batches, so every record type has the same create, update and soft delete set.
 
 Need from you
 - None. The Airtable rehearsal uses invented column names. If you remember the real column names from the old Airtable base, tell me and I will match them before Phase 11.

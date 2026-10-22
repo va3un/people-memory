@@ -1,6 +1,6 @@
 // Tests for the browser storage promise helper.
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { formatBytes, getStorageStatus, requestPersistentStorage } from './storage'
+import { formatBytes, getStorageEstimate, getStorageStatus, requestPersistentStorage } from './storage'
 
 type StorageStub = {
   persist: () => Promise<boolean>
@@ -73,6 +73,36 @@ describe('getStorageStatus', () => {
     const status = await getStorageStatus()
     expect(status.persisted).toBe(true)
     expect(persist).not.toHaveBeenCalled()
+  })
+})
+
+describe('getStorageEstimate', () => {
+  it('gives the used space and the total space', async () => {
+    Object.defineProperty(globalThis.navigator, 'storage', {
+      configurable: true,
+      value: stubStorage({ estimate: async () => ({ usage: 2048, quota: 1024 * 1024 }) }),
+    })
+
+    const estimate = await getStorageEstimate()
+    expect(estimate?.usage).toBe(2048)
+    expect(estimate?.quota).toBe(1024 * 1024)
+  })
+
+  it('gives nothing back when the browser cannot say', async () => {
+    expect(await getStorageEstimate()).toBeNull()
+  })
+
+  it('gives nothing back when the browser throws', async () => {
+    Object.defineProperty(globalThis.navigator, 'storage', {
+      configurable: true,
+      value: stubStorage({
+        estimate: async () => {
+          throw new Error('not allowed')
+        },
+      }),
+    })
+
+    expect(await getStorageEstimate()).toBeNull()
   })
 })
 

@@ -1,5 +1,6 @@
 // Typed helpers for each kind of record, so screens never build raw objects.
 import { db } from './database'
+import { collapseSpaces } from '../domain/names'
 import { createRecord, newId, softDeleteRecord, updateRecord } from './records'
 import type {
   CaptureBatch,
@@ -106,6 +107,10 @@ export function updateCaptureBatch(
   return updateRecord(db.captureBatches, id, changes)
 }
 
+export function deleteCaptureBatch(id: string): Promise<CaptureBatch | undefined> {
+  return softDeleteRecord(db.captureBatches, id)
+}
+
 // Device settings are simple key and value rows, stored in IndexedDB.
 export async function getDeviceSetting<T>(key: string): Promise<T | undefined> {
   const row = await db.deviceSettings.get(key)
@@ -123,11 +128,12 @@ export async function deleteDeviceSetting(key: string): Promise<void> {
 }
 
 // Builds a person record with sensible defaults, so callers only fill what matters.
-export function personDefaults(fullName: string): NewPerson {
-  const firstName = fullName.trim().split(/\s+/)[0] ?? fullName
+export function personDefaults(fullName: string): NewPerson & { id: string } {
+  const name = collapseSpaces(fullName)
+  const firstName = name.split(/\s+/)[0] ?? name
   return {
     id: newId(),
-    full_name: fullName.trim(),
+    full_name: name,
     display_name: firstName,
     nicknames: [],
     phones: [],
