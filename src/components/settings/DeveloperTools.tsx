@@ -4,10 +4,10 @@ import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
 import { Dialog } from '../ui/Dialog'
 import { showToast } from '../ui/Toast'
-import { COUNT_LABELS, countRecords, loadSampleData, softDeleteEverything } from '../../db/operations'
+import { COUNT_LABELS, countRecords, loadSampleData, softDeleteSampleData } from '../../db/operations'
 import type { RecordCounts } from '../../db/operations'
 
-// The word a developer must type to wipe records, so a stray tap cannot do it.
+// The word a developer must type to delete the sample data, so a stray tap cannot do it.
 const CONFIRM_WORD = 'DELETE'
 
 export function DeveloperTools() {
@@ -29,20 +29,26 @@ export function DeveloperTools() {
     try {
       await loadSampleData()
       await refresh()
-      showToast({ message: 'Sample data loaded', description: 'Eight fictional people are now in the app.' })
+      showToast({
+        message: 'Sample data loaded',
+        description: 'Eight fictional people are now in the app. Your own records were not changed.',
+      })
     } finally {
       setBusy(false)
     }
   }
 
-  const deleteAll = async () => {
+  const deleteSample = async () => {
     setBusy(true)
     try {
-      await softDeleteEverything()
+      await softDeleteSampleData()
       await refresh()
       setConfirmOpen(false)
       setConfirmText('')
-      showToast({ message: 'All records deleted', description: 'Nothing was really erased, so Undo is possible later.' })
+      showToast({
+        message: 'Sample data deleted',
+        description: 'Only the fictional records were marked as deleted. Your own records were not touched.',
+      })
     } finally {
       setBusy(false)
     }
@@ -59,7 +65,8 @@ export function DeveloperTools() {
           <div>
             <p className="font-medium">Test data only</p>
             <p className="mt-0.5 text-sm text-muted">
-              These tools are for trying the app with made-up people.
+              These tools only touch the fictional sample people. Your own people and records are never
+              changed.
             </p>
           </div>
           <span className="shrink-0 rounded-chip bg-accent-soft px-3 py-1 text-xs font-medium text-accent">
@@ -81,7 +88,7 @@ export function DeveloperTools() {
             Load sample data
           </Button>
           <Button variant="danger" onClick={() => setConfirmOpen(true)} disabled={busy}>
-            Delete all data
+            Delete sample data
           </Button>
         </div>
       </Card>
@@ -92,7 +99,7 @@ export function DeveloperTools() {
           setConfirmOpen(false)
           setConfirmText('')
         }}
-        title="Delete all data?"
+        title="Delete sample data?"
         footer={
           <>
             <Button
@@ -104,16 +111,17 @@ export function DeveloperTools() {
             >
               Cancel
             </Button>
-            <Button variant="danger" onClick={deleteAll} disabled={!canDelete || busy}>
-              Delete everything
+            <Button variant="danger" onClick={deleteSample} disabled={!canDelete || busy}>
+              Delete sample data
             </Button>
           </>
         }
       >
         <p>
-          This removes every person, context and relationship from this app. Records are marked as deleted,
-          so nothing is really erased yet.
+          This removes the fictional sample people, contexts and relationships from this app. Records are
+          marked as deleted, so nothing is really erased yet.
         </p>
+        <p className="mt-3">Your own people and records are never touched.</p>
         <p className="mt-3">Type {CONFIRM_WORD} to confirm.</p>
         <input
           aria-label="Confirmation word"

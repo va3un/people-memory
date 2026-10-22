@@ -9,6 +9,11 @@ export type SampleData = {
   relationships: Relationship[]
 }
 
+// Every sample record id starts with this prefix. It is how we tell
+// fictional test records apart from real ones, so the delete tool can
+// never touch a real person's record.
+export const SAMPLE_ID_PREFIX = 'sample-'
+
 // Fixed ids keep the sample data easy to read and easy to test.
 export const SAMPLE_IDS = {
   me: 'sample-person-me',
@@ -226,4 +231,9 @@ export function buildSampleData(): SampleData {
   ]
 
   return { people, contexts, memberships: buildMemberships(), relationships: buildRelationships() }
+}
+
+// Tells whether an id belongs to the fictional sample data.
+export function isSampleId(id: string): boolean {
+  return id.startsWith(SAMPLE_ID_PREFIX)
 }

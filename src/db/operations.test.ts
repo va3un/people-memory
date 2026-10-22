@@ -1,8 +1,15 @@
 // Tests for the typed helpers and the developer tools.
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { db } from './database'
-import { countRecords, loadSampleData, softDeleteEverything } from './operations'
-import { createPerson, deletePerson, updatePerson } from './typed'
+import { countRecords, loadSampleData, softDeleteSampleData } from './operations'
+import {
+  createContext,
+  createMembership,
+  createPerson,
+  createRelationship,
+  deletePerson,
+  updatePerson,
+} from './typed'
 import { SAMPLE_IDS } from './sampleData'
 
 // The typed helpers work on the shared database, so each test starts empty.
@@ -119,6 +126,55 @@ describe('loadSampleData', () => {
 
     expect(counts.people).toBe(8)
   })
+
+  it('keeps a real person that was already saved', async () => {
+    const real = await createPerson({
+      full_name: 'Real Person',
+      display_name: 'Real',
+      nicknames: [],
+      phones: [],
+      gender: 'unknown',
+      is_me: false,
+    })
+
+    await loadSampleData()
+
+    const saved = await db.people.get(real.id)
+    expect(saved?.full_name).toBe('Real Person')
+    expect(saved?.deleted).toBe(false)
+    const counts = await countRecords()
+    expect(counts.people).toBe(9)
+  })
+
+  it('does not overwrite a record that already uses a sample id', async () => {
+    await db.people.put({
+      id: SAMPLE_IDS.meera,
+      full_name: 'Someone Else',
+      display_name: 'Someone',
+      nicknames: [],
+      phones: [],
+      gender: 'unknown',
+      is_me: false,
+      deleted: false,
+      created_at: '2020-01-01T00:00:00.000Z',
+      updated_at: '2020-01-01T00:00:00.000Z',
+    })
+
+    await loadSampleData()
+
+    const saved = await db.people.get(SAMPLE_IDS.meera)
+    expect(saved?.full_name).toBe('Someone Else')
+  })
+
+  it('does not revive a sample record that was already deleted', async () => {
+    await loadSampleData()
+    await db.people.update(SAMPLE_IDS.rahul, { deleted: true })
+
+    await loadSampleData()
+
+    const rahul = await db.people.get(SAMPLE_IDS.rahul)
+    expect(rahul?.deleted).toBe(true)
+  })
 })
 
 describe('countRecords', () => {
@@ -132,11 +188,11 @@ describe('countRecords', () => {
   })
 })
 
-describe('softDeleteEverything', () => {
+describe('softDeleteSampleData', () => {
   it('marks every record deleted but keeps them', async () => {
     await loadSampleData()
 
-    await softDeleteEverything()
+    await softDeleteSampleData()
 
     const counts = await countRecords()
     expect(counts.people).toBe(0)
@@ -147,4 +203,69 @@ describe('softDeleteEverything', () => {
     expect(all.length).toBe(8)
     expect(all.every((row) => row.deleted)).toBe(true)
   })
+
+  it('does not touch a real person', async () => {
+    const real = await createPerson({
+      full_name: 'Real Person',
+      display_name: 'Real',
+      nicknames: [],
+      phones: [],
+      gender: 'unknown',
+      is_me: false,
+    })
+    await loadSampleData()
+
+    await softDeleteSampleData()
+
+    const saved = await db.people.get(real.id)
+    expect(saved?.deleted).toBe(false)
+    expect(saved?.full_name).toBe('Real Person')
+  })
+
+  it('does not touch a real context, membership or relationship', async () => {
+    const realContext = await createContext({ name: 'Real Place', kind: 'place' })
+    const realPerson = await createPerson({
+      full_name: 'Real Person',
+      display_name: 'Real',
+      nicknames: [],
+      phones: [],
+      gender: 'unknown',
+      is_me: false,
+    })
+    const realMembership = await createMembership({
+      person_id: realPerson.id,
+      context_id: realContext.id,
+      role: 'Friend',
+    })
+    const realRelationship = await createRelationship({
+      person_id: realPerson.id,
+      relative_id: realPerson.id,
+      type: 'friend',
+    })
+    await loadSampleData()
+
+    await softDeleteSampleData()
+
+    expect((await db.contexts.get(realContext.id))?.deleted).toBe(false)
+    expect((await db.memberships.get(realMembership.id))?.deleted).toBe(false)
+    expect((await db.relationships.get(realRelationship.id))?.deleted).toBe(false)
+  })
+
+  it('does not change the updated_at time of a real record', async () => {
+    const real = await createPerson({
+      full_name: 'Real Person',
+      display_name: 'Real',
+      nicknames: [],
+      phones: [],
+      gender: 'unknown',
+      is_me: false,
+      updated_at: '2020-01-01T00:00:00.000Z',
+    })
+
+    await softDeleteSampleData()
+
+    const saved = await db.people.get(real.id)
+    expect(saved?.updated_at).toBe('2020-01-01T00:00:00.000Z')
+  })
 })
+

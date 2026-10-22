@@ -1,6 +1,8 @@
 // Counts of every kind of record, used by the developer tools in Settings.
+import type { Table } from 'dexie'
 import { db } from './database'
-import { buildSampleData } from './sampleData'
+import { buildSampleData, isSampleId } from './sampleData'
+import type { BaseRecord } from './schema'
 
 export type RecordCounts = {
   people: number
@@ -36,52 +38,58 @@ export async function countRecords(): Promise<RecordCounts> {
 }
 
 // Adds the fictional sample data. Existing records are left alone.
+// A sample row whose id is already taken is skipped, so real records are
+// never overwritten even if they happen to share a sample id.
 export async function loadSampleData(): Promise<RecordCounts> {
   const sample = buildSampleData()
   await db.transaction(
     'rw',
     [db.people, db.contexts, db.memberships, db.relationships],
     async () => {
-      await db.people.bulkPut(sample.people)
-      await db.contexts.bulkPut(sample.contexts)
-      await db.memberships.bulkPut(sample.memberships)
-      await db.relationships.bulkPut(sample.relationships)
+      await putOnlyMissing(db.people, sample.people)
+      await putOnlyMissing(db.contexts, sample.contexts)
+      await putOnlyMissing(db.memberships, sample.memberships)
+      await putOnlyMissing(db.relationships, sample.relationships)
     },
   )
   return countRecords()
 }
 
-// Marks every record as deleted. Records are kept so deletions can sync.
-export async function softDeleteEverything(): Promise<void> {
+// Puts rows that are not in the table yet. Rows with an id that already
+// exists are left exactly as they are.
+async function putOnlyMissing<T extends BaseRecord>(table: Table<T, string>, rows: T[]) {
+  const missing: T[] = []
+  for (const row of rows) {
+    const existing = await table.get(row.id)
+    if (!existing) missing.push(row)
+  }
+  if (missing.length > 0) await table.bulkPut(missing)
+}
+
+// Marks the fictional sample records as deleted. Real records are never
+// touched. Records are kept so deletions can sync.
+export async function softDeleteSampleData(): Promise<void> {
   const now = new Date().toISOString()
   await db.transaction(
     'rw',
     [db.people, db.contexts, db.memberships, db.relationships, db.photos, db.captureBatches],
     async () => {
-      await db.people.toCollection().modify((row) => {
-        row.deleted = true
-        row.updated_at = now
-      })
-      await db.contexts.toCollection().modify((row) => {
-        row.deleted = true
-        row.updated_at = now
-      })
-      await db.memberships.toCollection().modify((row) => {
-        row.deleted = true
-        row.updated_at = now
-      })
-      await db.relationships.toCollection().modify((row) => {
-        row.deleted = true
-        row.updated_at = now
-      })
-      await db.photos.toCollection().modify((row) => {
-        row.deleted = true
-        row.updated_at = now
-      })
-      await db.captureBatches.toCollection().modify((row) => {
-        row.deleted = true
-        row.updated_at = now
-      })
+      await markSampleDeleted(db.people, now)
+      await markSampleDeleted(db.contexts, now)
+      await markSampleDeleted(db.memberships, now)
+      await markSampleDeleted(db.relationships, now)
+      await markSampleDeleted(db.photos, now)
+      await markSampleDeleted(db.captureBatches, now)
     },
   )
+}
+
+// Marks only the records whose id shows they are fictional sample data.
+async function markSampleDeleted<T extends BaseRecord>(table: Table<T, string>, now: string) {
+  const sampleIds = (await table.toCollection().filter((row) => isSampleId(row.id)).primaryKeys())
+  if (sampleIds.length === 0) return
+  await table.where('id').anyOf(sampleIds).modify((row) => {
+    row.deleted = true
+    row.updated_at = now
+  })
 }

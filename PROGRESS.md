@@ -10,23 +10,26 @@ What was done
 - Added `src/domain/names.ts` to normalise names and text. It folds case, removes accents from Latin letters only, squeezes spaces, and keeps Devanagari words whole.
 - Added the fictional sample data from roadmap section 16.1: eight people, six contexts, nine memberships and five relationships. All names are invented. Meera has the nicknames "Mera" and "मीरा".
 - Settings now has a Storage card. It asks the browser to keep the app data and shows the answer in plain words, with the space used.
-- Settings now has a Developer tools card, marked "Test data only". It shows the count of every kind of record, a "Load sample data" button and a "Delete all data" button.
-- "Delete all data" cannot be done in one tap. A box opens and asks for the word DELETE. Nothing is really erased, every record is only marked as deleted.
+- Settings now has a Developer tools card, marked "Test data only". It shows the count of every kind of record, a "Load sample data" button and a "Delete sample data" button.
+- The delete button now says "Delete sample data" instead of "Delete all data". It only touches the fictional sample records, so your own people are safe even if you tap it by mistake.
+- "Delete sample data" cannot be done in one tap. A box opens and asks for the word DELETE. Nothing is really erased, the sample records are only marked as deleted.
+- "Load sample data" now keeps everything you already have. If a record already uses the same id, it is left alone and never overwritten.
 - Added the Airtable mapping rehearsal in `docs/AIRTABLE_MAPPING.md`, using invented column names so no private data is in this public repository.
-- Added 80 new tests. All 119 tests pass. Typecheck and build pass.
+- Added 87 new tests. All 126 tests pass. Typecheck and build pass.
 - Added `dexie@4.4.6` for the database and `fake-indexeddb@6.2.6` so the tests can use a pretend IndexedDB.
 
 Please test
 1. Open the app on the phone and tap Settings. Scroll down. You see a Storage card and a "Developer tools" card with a "Test data only" label.
 2. Tap "Load sample data". The counts appear: 8 people, 6 contexts, 9 memberships, 5 relationships.
 3. Close the app completely, then open it again from the home screen. Tap Settings. The counts are still there, so the data really was saved on the phone.
-4. Tap "Delete all data". A box opens asking for the word DELETE. Type DELETE and tap "Delete everything". The counts go to zero.
+4. Tap "Delete sample data". A box opens asking for the word DELETE. Type DELETE and tap "Delete sample data". The counts go to zero. Now tap "Load sample data" again. The counts come back to 8, 6, 9 and 5. Nothing of yours was lost either way.
 5. Look at the Storage card. It says either "Kept by the browser" or "Not guaranteed". If it says "Not guaranteed", tap "Keep my data" and see if the message changes.
 
 Decisions I made
 - Dexie for IndexedDB, because it gives typed tables and transactions with no server.
 - Deleting marks records instead of removing them, following the roadmap rule that deletions must be able to sync.
 - The delete button needs the word DELETE typed in, so a stray tap can never wipe real records.
+- The developer delete button was renamed "Delete sample data" and now only removes records whose id starts with "sample-". That is how the app tells the fictional people from real ones, so real people can never be touched by a test tool.
 - The Storage card is on the Settings screen now, not waiting for Phase 12, because data already exists from this phase onwards.
 - Accent removal only touches Latin letters. Removing accents from Devanagari would break the combining marks and break Hindi names.
 - The sample data uses fixed ids, so the tests can check the same people every time.
@@ -36,6 +39,8 @@ Decisions I made
 - A deleted "Me" person is now ignored when the app looks for you, so a deleted Me does not reappear.
 - Creating a record now keeps the created_at and updated_at times when they are given, the same way it already kept a given id. This matters for the Airtable import in Phase 11, where old records should keep their real dates.
 - Fixed a test that could fail at random. It checked that updated_at changed, but a create and an update inside the same millisecond looked the same. The test now starts from an old date, so it always passes.
+- Loading sample data skips any row whose id is already in the database. So an existing record is never overwritten, and a sample record you deleted earlier does not come back by itself.
+- Your own people are not affected by "Delete sample data" at all. Only records whose id starts with "sample-" are marked as deleted. A separate full wipe for your own data will come later, with a backup first.
 
 Need from you
 - None. The Airtable rehearsal uses invented column names. If you remember the real column names from the old Airtable base, tell me and I will match them before Phase 11.
