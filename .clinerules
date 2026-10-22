@@ -1,4 +1,3 @@
-```text
 PROJECT
 An offline-first "people memory" web app (PWA) for one user, Varun. The source code is public but users' stored people data is private. He is not a programmer. Explain results in plain, short language.
 
@@ -35,5 +34,3 @@ SAFETY AND COST
 
 SELF-CHECK BEFORE FINISHING A TASK
 - Typecheck, tests and build pass. The feature works as the phase describes. Tests exist for logic (relationships, search, merge, capture resolver).
-```
----
