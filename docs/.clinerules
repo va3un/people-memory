@@ -1,0 +1,39 @@
+```text
+PROJECT
+An offline-first "people memory" web app (PWA) for one user, Varun. The source code is public but users' stored people data is private. He is not a programmer. Explain results in plain, short language.
+
+HOW TO RUN
+- When told "Run Phase N of docs/ROADMAP.md": read docs/ROADMAP.md, PROGRESS.md and this file, then do every task of that phase in order, without asking for plan approval.
+- If PROGRESS.md shows a half-finished phase, continue it instead of restarting.
+- Commit after every finished task with a plain message. Push only when typecheck, tests and build all pass. Check that the GitHub Actions run succeeds.
+- At the end, write the report at the top of PROGRESS.md: What was done, Please test (5 checks at most with exact taps), Decisions I made, Need from you (only if blocked).
+
+WHEN TO STOP AND ASK (only these)
+1. A missing decision that changes the data model, privacy, or cost.
+2. Varun must act himself (Dropbox app, API key, phone test).
+3. The same error persists after three different fixes.
+4. Anything asks for a credit card, payment method or paid plan.
+5. An action could destroy real data.
+Everything else: decide, log it under Decisions I made, and continue.
+
+CODE RULES
+- TypeScript, React, Vite, Tailwind, Dexie, MiniSearch, zod, Vitest. No own backend, no own server, no app accounts. Optional third-party accounts may be used for sync and AI.
+- Any new package needs a one-line reason in PROGRESS.md. Pin exact versions (no caret or tilde signs).
+- Keep implementation files under 250 lines where sensible; do not add comments to JSON files (JSON does not permit them). Add one plain-English purpose comment to source files where syntax permits.
+- Dates are UTC ISO strings. IDs are UUIDs. Main data lives in IndexedDB through Dexie, never localStorage.
+- Never hard-delete ordinary records. Use the deleted flag; explicit test-data reset and confirmed replace-import are exceptional operations requiring confirmation.
+- Do not change the data model in section 8 without stopping to ask.
+- System fonts only. Load nothing from other websites.
+- Dropbox code stays in src/sync/. AI capture code stays in src/capture/. Relationship labels stay in src/domain/relationships.ts.
+- API keys and sync refresh tokens live only in device settings, never in the repository, exports, logs, URLs or error reports. Do not mistake IndexedDB for hardware-secure storage.
+- The repository is public. Never commit real people data, photos, keys or exports. Use only the fictional sample data.
+- Follow the design system in section 11 for every screen.
+
+SAFETY AND COST
+- Never add or suggest a paid service. If a free quota runs out, wait or use another free route.
+- No destructive commands (delete folders, force push, hard reset) without asking. Never auto-approve a command that can expose secrets or publish real people data.
+
+SELF-CHECK BEFORE FINISHING A TASK
+- Typecheck, tests and build pass. The feature works as the phase describes. Tests exist for logic (relationships, search, merge, capture resolver).
+```
+---
