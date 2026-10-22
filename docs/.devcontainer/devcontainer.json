@@ -1,0 +1,13 @@
+
+{
+  "name": "People Memory App",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24-bookworm",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "saoudrizwan.claude-dev"
+      ]
+    }
+  },
+  "forwardPorts": [5173]
+}
