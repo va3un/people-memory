@@ -237,3 +237,42 @@ export function buildSampleData(): SampleData {
 export function isSampleId(id: string): boolean {
   return id.startsWith(SAMPLE_ID_PREFIX)
 }
+
+// The ids of every known fictional sample record.
+export function sampleRecordIds(): Set<string> {
+  const sample = buildSampleData()
+  return new Set([
+    ...sample.people.map((row) => row.id),
+    ...sample.contexts.map((row) => row.id),
+    ...sample.memberships.map((row) => row.id),
+    ...sample.relationships.map((row) => row.id),
+  ])
+}
+
+// Tells whether a stored record still holds the same content as the sample
+// record. A field the user changed, or added, means the record is no longer
+// the plain sample record, so it is kept as it is.
+export function isSameSampleContent(
+  stored: Record<string, unknown>,
+  sample: Record<string, unknown>,
+): boolean {
+  const keys = new Set([...Object.keys(stored), ...Object.keys(sample)])
+  for (const key of keys) {
+    if (IGNORED_KEYS.has(key)) continue
+    const left = stored[key]
+    const right = sample[key]
+    if (left === undefined && right === undefined) continue
+    // A field only the stored record has was added by the user.
+    if (right === undefined) return false
+    if (!sameValue(left, right)) return false
+  }
+  return true
+}
+
+// The fields that describe when a record was saved, not what it says.
+const IGNORED_KEYS = new Set(['id', 'created_at', 'updated_at', 'deleted'])
+
+// Compares two field values, including arrays and objects.
+function sameValue(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left ?? null) === JSON.stringify(right ?? null)
+}

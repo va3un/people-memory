@@ -1,6 +1,6 @@
 // Tests for the fictional sample data from roadmap section 16.1.
 import { describe, expect, it } from 'vitest'
-import { buildSampleData, SAMPLE_IDS } from './sampleData'
+import { buildSampleData, isSameSampleContent, isSampleId, sampleRecordIds, SAMPLE_IDS } from './sampleData'
 
 const sample = buildSampleData()
 
@@ -91,5 +91,46 @@ describe('sample data', () => {
 
   it('gives the same result every time it is built', () => {
     expect(buildSampleData()).toEqual(sample)
+  })
+})
+
+describe('sampleRecordIds', () => {
+  it('has an id for every sample record', () => {
+    const ids = sampleRecordIds()
+    expect(ids.size).toBe(8 + 6 + 9 + 5)
+  })
+
+  it('holds only ids that start with the sample prefix', () => {
+    for (const id of sampleRecordIds()) {
+      expect(isSampleId(id)).toBe(true)
+    }
+  })
+})
+
+describe('isSameSampleContent', () => {
+  const meera = sample.people.find((row) => row.id === SAMPLE_IDS.meera)!
+
+  it('says an unchanged record is the same', () => {
+    expect(isSameSampleContent(meera, meera)).toBe(true)
+  })
+
+  it('ignores the id, the times and the deleted flag', () => {
+    const stored = { ...meera, id: 'other-id', updated_at: 'later', deleted: true }
+    expect(isSameSampleContent(stored, meera)).toBe(true)
+  })
+
+  it('spots a changed field', () => {
+    const stored = { ...meera, full_name: 'Someone Else' }
+    expect(isSameSampleContent(stored, meera)).toBe(false)
+  })
+
+  it('spots a field the user added', () => {
+    const stored = { ...meera, city: 'Borli' }
+    expect(isSameSampleContent(stored, meera)).toBe(false)
+  })
+
+  it('compares lists of values', () => {
+    const stored = { ...meera, nicknames: ['Mera'] }
+    expect(isSameSampleContent(stored, meera)).toBe(false)
   })
 })

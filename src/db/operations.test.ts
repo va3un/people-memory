@@ -166,14 +166,70 @@ describe('loadSampleData', () => {
     expect(saved?.full_name).toBe('Someone Else')
   })
 
-  it('does not revive a sample record that was already deleted', async () => {
+  it('brings back a sample record that was deleted as test data', async () => {
     await loadSampleData()
     await db.people.update(SAMPLE_IDS.rahul, { deleted: true })
 
     await loadSampleData()
 
     const rahul = await db.people.get(SAMPLE_IDS.rahul)
-    expect(rahul?.deleted).toBe(true)
+    expect(rahul?.deleted).toBe(false)
+  })
+
+  it('brings back every deleted sample record when the sample data is loaded again', async () => {
+    await loadSampleData()
+    await softDeleteSampleData()
+
+    const counts = await loadSampleData()
+
+    expect(counts.people).toBe(8)
+    expect(counts.contexts).toBe(6)
+    expect(counts.memberships).toBe(9)
+    expect(counts.relationships).toBe(5)
+  })
+
+  it('keeps changes the user made to a sample person', async () => {
+    await loadSampleData()
+    await db.people.update(SAMPLE_IDS.rahul, {
+      full_name: 'Rahul Patil (my cousin)',
+      city: 'Borli',
+      deleted: true,
+    })
+
+    await loadSampleData()
+
+    const rahul = await db.people.get(SAMPLE_IDS.rahul)
+    expect(rahul?.deleted).toBe(false)
+    expect(rahul?.full_name).toBe('Rahul Patil (my cousin)')
+    expect(rahul?.city).toBe('Borli')
+  })
+
+  it('keeps a note the user added to a sample person', async () => {
+    await loadSampleData()
+    await db.people.update(SAMPLE_IDS.meera, { notes: 'Met at the society', deleted: true })
+
+    await loadSampleData()
+
+    const meera = await db.people.get(SAMPLE_IDS.meera)
+    expect(meera?.deleted).toBe(false)
+    expect(meera?.notes).toBe('Met at the society')
+  })
+
+  it('does not bring back a real person that was deleted', async () => {
+    const real = await createPerson({
+      full_name: 'Real Person',
+      display_name: 'Real',
+      nicknames: [],
+      phones: [],
+      gender: 'unknown',
+      is_me: false,
+    })
+    await db.people.update(real.id, { deleted: true })
+
+    await loadSampleData()
+
+    const saved = await db.people.get(real.id)
+    expect(saved?.deleted).toBe(true)
   })
 })
 
