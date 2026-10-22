@@ -1,6 +1,6 @@
 People memory app: project roadmap, version 3
 Revised 22 October 2026 for Varun Nagwekar. This file supersedes version 2 after Varun approves it for use. Version 2 remains archived and unchanged.
-Keep one copy in the ChatGPT project, one at `D:\Dropbox\Personal People Directory\docs\`, and one in the code repository as `docs/ROADMAP.md`.
+Keep one copy in the ChatGPT project, one at `D:\Dropbox\People Memory App\docs\`, and one in the code repository as `docs/ROADMAP.md`.
 What changed from version 2:
 Retained Claude's core vision, tech stack, eleven core product milestones, one-phase Cline workflow, and Phase 0 manual setup. Phase numbering 0 through 13 is unchanged.
 Tightened privacy: distinguish no app account from third-party sign-in; disclose unencrypted local and Dropbox storage, and require explicit consent before sharing passages with any external chatbot or API.
@@ -156,9 +156,9 @@ GitHub Actions runs typecheck, tests and build on every push, and deploys to Pag
 `.devcontainer/devcontainer.json` lists the Cline extension (`saoudrizwan.claude-dev`) so it installs automatically in every new Codespace.
 Dependabot and automatic updates stay off. The app is meant to stay frozen.
 7.3 Dropbox folder on the PC
-`D:\Dropbox\Personal People Directory\` holds documents and backups, never the code repository (Dropbox would sync tens of thousands of files in `node_modules` and can damage `.git`).
+`D:\Dropbox\People Memory App\` holds documents and backups, never the code repository (Dropbox would sync tens of thousands of files in `node_modules` and can damage `.git`).
 ```text
-D:\Dropbox\Personal People Directory\
+D:\Dropbox\People Memory App\
   docs\       roadmap versions, notes
   backups\    exports from the app, one per month
   design\     screenshots, Bolt.new experiments
@@ -407,7 +407,7 @@ Export vCard: people with phone numbers.
 Import JSON: validate format/version and content, preview counts and duplicates, ask whether to merge or replace (default merge). Before replace, require a successful downloadable backup and explicit typed confirmation. Do not accept malformed or oversized imports that could corrupt the database.
 A small notice in Settings if the last confirmed downloaded export is more than 30 days old. No pop-ups. Keep a "Backup now" button visible while sync is unconfigured.
 Exports never include the API key.
-Suggested habit: save the monthly export into `D:\Dropbox\Personal People Directory\backups\`.
+Suggested habit: save the monthly export into `D:\Dropbox\People Memory App\backups\`.
 ---
 14. Build phases
 Each phase has Tasks, Cline self-checks, and Phone checks. Test with fictional data until the Phase 11 import has been reviewed. Do not ask Varun to clear real data as a casual phone check. Cline works through the tasks in order, commits after each, and ticks it off in `PROGRESS.md`. Do not start a phase until the previous one is approved.
@@ -522,7 +522,7 @@ Phase 13 (optional, after 1.0): Bolt.new comparison
 Goal: see how another tool styles the same app, and borrow good ideas.
 Use the free Bolt plan. Do not upgrade. Free limits are 1M tokens a month and 300K a day, so keep the prompt short and ask for a front-end mockup only.
 Paste the prompt from Appendix A with sample data. No real people data.
-Save screenshots into `D:\Dropbox\Personal People Directory\design\`.
+Save screenshots into `D:\Dropbox\People Memory App\design\`.
 Compare with the real app and note what looks better.
 Ask ChatGPT to turn the good ideas into small design changes, and give them to Cline as normal tasks. Do not move code from Bolt into the repository.
 ---
