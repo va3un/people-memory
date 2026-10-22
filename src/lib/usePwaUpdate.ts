@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { registerSW } from 'virtual:pwa-register'
 import { showToast } from '../components/ui/Toast'
 
 // Watches for a new app version and offers a tap to refresh.
 export function usePwaUpdate() {
   const [needRefresh, setNeedRefresh] = useState(false)
+  const updateSWRef = useRef<((reloadPage?: boolean) => Promise<void>) | null>(null)
 
   useEffect(() => {
-    const updateSW = registerSW({
+    updateSWRef.current = registerSW({
       immediate: true,
       onNeedRefresh() {
         setNeedRefresh(true)
@@ -18,7 +19,7 @@ export function usePwaUpdate() {
     })
 
     return () => {
-      void updateSW
+      updateSWRef.current = null
     }
   }, [])
 
@@ -30,7 +31,10 @@ export function usePwaUpdate() {
       description: 'A new version of People is ready.',
       action: {
         label: 'Refresh',
-        onClick: () => window.location.reload(),
+        onClick: () => {
+          // Activates the waiting service worker, then reloads onto the new version.
+          void updateSWRef.current?.(true)
+        },
       },
     })
   }, [needRefresh])
