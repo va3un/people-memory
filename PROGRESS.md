@@ -1,5 +1,30 @@
 # Latest report
-Phase 2 is built. The app now has a real database in the phone, sample data you can load, and Settings that shows how much data is stored and whether the browser will keep it.
+Phase 3 is built. The Add screen now lets you add a photo and quickly link a new person to someone you already know.
+
+What was done
+- Added `src/lib/image.ts` with `shrinkImage()`, a canvas-based helper that shrinks a picked JPEG to at most 600px on its long side at 80% quality before saving. Photos live in the existing `photos` table and link to a person.
+- Reworked the Add screen quick-add form: photo picker with preview and remove, name, how-i-know, a related-to dropdown built from existing people, fold-out More details (phone, city, nicknames, notes), Save / Save-and-add-another buttons, toast confirmation, and Save disabled until a name is entered. Picking a related person creates a relationship row.
+- `getPeople()` now sorts people newest-first in JavaScript instead of Dexie `sortBy('-updated_at')` for more reliable ordering.
+- Added `src/lib/image.test.ts` (3 unit tests for the image shrinker) and `src/pages/AddPage.test.tsx` (5 integration tests for the quick-add form). All tests use only fictional sample data.
+- No new npm packages were added; the image shrinker uses the HTML canvas already in the browser.
+
+Please test
+1. Open the Add screen. Tap the photo picker, choose a JPEG photo, and see a preview appear with a "Remove" option.
+2. Enter a name and tap Save. The person is saved with a shrunk photo, and a toast confirms it.
+3. Choose someone from the "Related to" dropdown, then Save. Open that person and confirm the relationship link appears both ways.
+4. Tap "Save and add another". The form clears (name and photo) so you can add another person right away.
+5. Leave the name empty and confirm Save stays disabled until you type a name.
+
+Decisions I made
+- Photos are stored as shrunk JPEGs (≤600px long side) in IndexedDB via the existing photos table, never as original files, to keep storage small and offline-first.
+- No new npm packages were added; the image shrinker uses the HTML canvas already available in the browser.
+- The related-to dropdown lists non-deleted people newest-first, so the people you know most recently are easiest to reach.
+- Save-and-add-another clears the form after saving instead of navigating away, so you can enter several people in a row.
+
+Need from you
+- None.
+
+# Previous report (Phase 2)
 
 What was done
 - Added Dexie as the database. All main data now lives in IndexedDB on the phone, never in localStorage. Seven tables exist: people, contexts, memberships, relationships, photos, capture batches and device settings.
@@ -46,7 +71,7 @@ Need from you
 - None. The Airtable rehearsal uses invented column names. If you remember the real column names from the old Airtable base, tell me and I will match them before Phase 11.
 
 # Current phase
-Phase 2: Data layer, sample data and storage status
+Phase 3: Photo support and related-person quick-add
 
 # Done
 - GitHub account verified.
@@ -56,6 +81,7 @@ Phase 2: Data layer, sample data and storage status
 - Phase 1: empty app, design system and live install.
 - Rules file renamed to .clinerules and cleaned, so Cline loads it.
 - Phase 2: Dexie data layer, domain rules, sample data, Settings developer tools, storage status, Airtable mapping rehearsal.
+- Phase 3: photo support and related-person quick-add on the Add screen; all 145 tests pass, typecheck and production build pass; committed as 8ad341b and pushed to GitHub.
 
 # Known problems
 - None.
