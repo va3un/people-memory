@@ -127,6 +127,12 @@ export async function deleteDeviceSetting(key: string): Promise<void> {
   await db.deviceSettings.delete(key)
 }
 
+// Lists people that are not marked as deleted, newest first.
+export async function getPeople(): Promise<Person[]> {
+  const people = await db.people.filter((row) => !row.deleted).toArray()
+  return people.sort((a, b) => (b.updated_at ?? '').localeCompare(a.updated_at ?? ''))
+}
+
 // Builds a person record with sensible defaults, so callers only fill what matters.
 export function personDefaults(fullName: string): NewPerson & { id: string } {
   const name = collapseSpaces(fullName)
