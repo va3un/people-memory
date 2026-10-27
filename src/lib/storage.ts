@@ -16,7 +16,7 @@ export async function requestPersistentStorage(): Promise<StorageStatus> {
     return {
       state: 'unsupported',
       persisted: false,
-      message: 'This browser cannot promise to keep the data. Export a backup often.',
+      message: 'This browser cannot promise to keep the data. Backup is not available yet. Use fictional data only.',
     }
   }
 
@@ -27,14 +27,14 @@ export async function requestPersistentStorage(): Promise<StorageStatus> {
       state: persisted ? 'granted' : 'denied',
       persisted,
       message: persisted
-        ? 'The browser will keep this app data, even when the phone is low on space.'
-        : 'The browser may clear this app data. Export a backup often.',
+        ? 'Protected against automatic storage cleanup. Clearing site data or losing this device still loses these records. Backup is not available yet. Use fictional data only.'
+        : 'The browser may clear this app data. Backup is not available yet. Use fictional data only.',
     }
   } catch {
     return {
       state: 'denied',
       persisted: false,
-      message: 'The browser would not promise to keep the data. Export a backup often.',
+      message: 'The browser would not promise to keep the data. Backup is not available yet. Use fictional data only.',
     }
   }
 }
@@ -45,7 +45,7 @@ export async function getStorageStatus(): Promise<StorageStatus> {
     return {
       state: 'unsupported',
       persisted: false,
-      message: 'This browser cannot promise to keep the data. Export a backup often.',
+      message: 'This browser cannot promise to keep the data. Backup is not available yet. Use fictional data only.',
     }
   }
   try {
@@ -54,14 +54,14 @@ export async function getStorageStatus(): Promise<StorageStatus> {
       state: persisted ? 'granted' : 'denied',
       persisted,
       message: persisted
-        ? 'The browser will keep this app data, even when the phone is low on space.'
-        : 'The browser may clear this app data. Export a backup often.',
+        ? 'Protected against automatic storage cleanup. Clearing site data or losing this device still loses these records. Backup is not available yet. Use fictional data only.'
+        : 'The browser may clear this app data. Backup is not available yet. Use fictional data only.',
     }
   } catch {
     return {
       state: 'denied',
       persisted: false,
-      message: 'The browser would not promise to keep the data. Export a backup often.',
+      message: 'The browser would not promise to keep the data. Backup is not available yet. Use fictional data only.',
     }
   }
 }

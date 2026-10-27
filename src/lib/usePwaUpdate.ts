@@ -32,6 +32,7 @@ export function usePwaUpdate() {
       action: {
         label: 'Refresh',
         onClick: () => {
+          if (document.querySelector('[data-unsaved]') && !window.confirm('Refresh and discard your unsaved changes?')) return
           // Activates the waiting service worker, then reloads onto the new version.
           void updateSWRef.current?.(true)
         },

@@ -1,56 +1,76 @@
-// Image handling for photos. Photos are shrunk to at most 600 px on the long
-// side and saved as JPEG at quality 0.8, so each photo is roughly 30 to 80 KB.
-// This matches roadmap section 8.5. Nothing is sent anywhere; the blob lives in
-// IndexedDB on the phone.
-
-// Shrinks an image file to at most maxSize on the long side, encoded as JPEG.
-// Returns the blob and its dimensions, so the caller can store it as a photo.
+// Decode locally, flatten transparency onto white, and store a small JPEG without source metadata.
 export async function shrinkImage(
   file: File,
   { maxSize = 600, quality = 0.8 }: { maxSize?: number; quality?: number } = {},
 ): Promise<{ blob: Blob; mime: string; width: number; height: number; bytes: number }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload = () => {
-      let width = img.naturalWidth
-      let height = img.naturalHeight
-      if (Math.max(width, height) > maxSize) {
-        const scale = maxSize / Math.max(width, height)
-        width = Math.round(width * scale)
-        height = Math.round(height * scale)
-      }
-      const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('Could not create a canvas context'))
-        return
-      }
-      ctx.drawImage(img, 0, 0, width, height)
-      canvas.toBlob(
-        (blob) => {
-          URL.revokeObjectURL(img.src)
-          if (!blob) {
-            reject(new Error('Could not encode the image'))
-            return
-          }
-          resolve({
-            blob,
-            mime: 'image/jpeg',
-            width,
-            height,
-            bytes: blob.size,
-          })
-        },
-        'image/jpeg',
-        quality,
+  if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) {
+    throw new Error('Choose an image smaller than 20 MB.')
+  }
+  if (
+    !Number.isFinite(maxSize) ||
+    maxSize < 1 ||
+    maxSize > 600 ||
+    !Number.isFinite(quality) ||
+    quality <= 0 ||
+    quality > 1
+  ) {
+    throw new Error('Invalid image size or quality.')
+  }
+  const url = URL.createObjectURL(file)
+  try {
+    return await new Promise((resolve, reject) => {
+      const img = new Image()
+      const timeout = window.setTimeout(
+        () => reject(new Error('Photo processing timed out. Try another image.')),
+        15_000,
       )
-    }
-    img.onerror = () => {
-      URL.revokeObjectURL(img.src)
-      reject(new Error('Failed to load the image'))
-    }
-    img.src = URL.createObjectURL(file)
-  })
+      const fail = (error: unknown) => {
+        window.clearTimeout(timeout)
+        reject(error instanceof Error ? error : new Error('Could not process this photo.'))
+      }
+      img.onerror = () =>
+        fail(new Error('Could not read this photo. Choose another image or remove it and retry.'))
+      img.onload = () => {
+        try {
+          if (
+            !img.naturalWidth ||
+            !img.naturalHeight ||
+            img.naturalWidth * img.naturalHeight > 40_000_000
+          ) {
+            throw new Error(
+              'This photo is too large or has invalid dimensions. Choose a smaller photo.',
+            )
+          }
+          const scale = Math.min(1, maxSize / Math.max(img.naturalWidth, img.naturalHeight))
+          const width = Math.max(1, Math.round(img.naturalWidth * scale))
+          const height = Math.max(1, Math.round(img.naturalHeight * scale))
+          const canvas = document.createElement('canvas')
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          if (!ctx) throw new Error('Photo processing is unavailable in this browser.')
+          ctx.fillStyle = '#ffffff'
+          ctx.fillRect(0, 0, width, height)
+          ctx.drawImage(img, 0, 0, width, height)
+          canvas.toBlob(
+            (blob) => {
+              window.clearTimeout(timeout)
+              if (!blob || blob.type !== 'image/jpeg') {
+                fail(new Error('Could not encode this photo as JPEG.'))
+                return
+              }
+              resolve({ blob, mime: 'image/jpeg', width, height, bytes: blob.size })
+            },
+            'image/jpeg',
+            quality,
+          )
+        } catch (error) {
+          fail(error)
+        }
+      }
+      img.src = url
+    })
+  } finally {
+    URL.revokeObjectURL(url)
+  }
 }

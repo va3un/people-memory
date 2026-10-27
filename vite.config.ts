@@ -17,6 +17,23 @@ const base = isDeployBuild && repositoryName ? `/${repositoryName}/` : './'
 export default defineConfig({
   base,
   plugins: [
+    {
+      name: 'production-content-security-policy',
+      apply: 'build',
+      transformIndexHtml() {
+        return [
+          {
+            tag: 'meta',
+            attrs: {
+              'http-equiv': 'Content-Security-Policy',
+              content:
+                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'",
+            },
+            injectTo: 'head-prepend',
+          },
+        ]
+      },
+    },
     react(),
     tailwindcss(),
     VitePWA({

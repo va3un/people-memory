@@ -188,7 +188,7 @@ describe('loadSampleData', () => {
     expect(counts.relationships).toBe(5)
   })
 
-  it('keeps changes the user made to a sample person', async () => {
+  it('does not resurrect an edited sample person', async () => {
     await loadSampleData()
     await db.people.update(SAMPLE_IDS.rahul, {
       full_name: 'Rahul Patil (my cousin)',
@@ -199,19 +199,19 @@ describe('loadSampleData', () => {
     await loadSampleData()
 
     const rahul = await db.people.get(SAMPLE_IDS.rahul)
-    expect(rahul?.deleted).toBe(false)
+    expect(rahul?.deleted).toBe(true)
     expect(rahul?.full_name).toBe('Rahul Patil (my cousin)')
     expect(rahul?.city).toBe('Borli')
   })
 
-  it('keeps a note the user added to a sample person', async () => {
+  it('keeps an edited sample note and deletion unchanged', async () => {
     await loadSampleData()
     await db.people.update(SAMPLE_IDS.meera, { notes: 'Met at the society', deleted: true })
 
     await loadSampleData()
 
     const meera = await db.people.get(SAMPLE_IDS.meera)
-    expect(meera?.deleted).toBe(false)
+    expect(meera?.deleted).toBe(true)
     expect(meera?.notes).toBe('Met at the society')
   })
 
@@ -325,3 +325,21 @@ describe('softDeleteSampleData', () => {
   })
 })
 
+it('sample deletion preserves edited fixtures, unknown prefixed IDs and newly linked fixtures', async () => {
+  await loadSampleData()
+  await db.people.update(SAMPLE_IDS.rahul, { notes: 'Edited fictional fixture' })
+  const custom = await createPerson({
+    id: 'sample-custom-fictional',
+    full_name: 'Fictional Custom',
+    display_name: 'Fictional',
+    gender: 'unknown',
+    nicknames: [],
+    phones: [],
+    is_me: false,
+  })
+  await createRelationship({ person_id: custom.id, relative_id: SAMPLE_IDS.meera, type: 'friend' })
+  await softDeleteSampleData()
+  expect((await db.people.get(SAMPLE_IDS.rahul))?.deleted).toBe(false)
+  expect((await db.people.get(custom.id))?.deleted).toBe(false)
+  expect((await db.people.get(SAMPLE_IDS.meera))?.deleted).toBe(false)
+})

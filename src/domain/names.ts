@@ -3,14 +3,9 @@
 
 // Removes accents from Latin letters. Other scripts are left exactly as they are.
 function stripAccents(text: string): string {
-  let out = ''
-  for (const character of text) {
-    const code = character.codePointAt(0) ?? 0
-    const isLatin =
-      (code >= 0x00c0 && code <= 0x024f) || (code >= 0x1e00 && code <= 0x1eff)
-    out += isLatin ? character.normalize('NFD').replace(/\p{Diacritic}/gu, '') : character
-  }
-  return out
+  return text.replace(/\p{Script=Latin}\p{M}*/gu, cluster =>
+    cluster.normalize('NFD').replace(/\p{M}/gu, ''),
+  )
 }
 
 // Lowercases and removes accents, keeping every other code point.

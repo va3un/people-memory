@@ -9,7 +9,8 @@ import { shrinkImage } from './image'
 function stubImageAndCanvas({
   width = 1200,
   height = 900,
-}: { width?: number; height?: number } = {}) {
+  failure,
+}: { width?: number; height?: number; failure?: 'context' | 'encode' | 'draw' } = {}) {
   let latest: any
   const OriginalImage = globalThis.Image
   const OriginalCanvas = globalThis.HTMLCanvasElement
@@ -31,10 +32,19 @@ function stubImageAndCanvas({
     width = 0
     height = 0
     getContext() {
-      return { drawImage: vi.fn() } as unknown as CanvasRenderingContext2D
+      if (failure === 'context') return null
+      return {
+        drawImage:
+          failure === 'draw'
+            ? () => {
+                throw new Error('Canvas failed')
+              }
+            : vi.fn(),
+        fillRect: vi.fn(),
+      } as unknown as CanvasRenderingContext2D
     }
     toBlob(callback: BlobCallback, _type: string, _quality: number) {
-      callback(blob)
+      callback(failure === 'encode' ? null : blob)
     }
   }
   globalThis.HTMLCanvasElement = FakeCanvas as unknown as typeof HTMLCanvasElement
@@ -105,9 +115,61 @@ describe('shrinkImage', () => {
       const file = new File(['original'], 'photo.jpg', { type: 'image/jpeg' })
       const promise = shrinkImage(file)
       triggerError()
-      await expect(promise).rejects.toThrow('Failed to load')
+      await expect(promise).rejects.toThrow('Could not read this photo')
     } finally {
       restore()
     }
   })
+})
+
+describe('photo failure cleanup', () => {
+  it.each(['context', 'encode', 'draw'] as const)(
+    'rejects %s failures and releases its object URL',
+    async (failure) => {
+      const { triggerLoad, restore, latest } = stubImageAndCanvas({ failure })
+      const revoke = vi.spyOn(URL, 'revokeObjectURL')
+      try {
+        const promise = shrinkImage(new File(['fictional'], 'fictional.png', { type: 'image/png' }))
+        const url = latest().src
+        triggerLoad()
+        await expect(promise).rejects.toThrow()
+        expect(revoke).toHaveBeenCalledWith(url)
+      } finally {
+        restore()
+      }
+    },
+  )
+  it('rejects invalid dimensions without leaving an object URL', async () => {
+    const { triggerLoad, restore } = stubImageAndCanvas({ width: 0, height: 0 })
+    const revoke = vi.spyOn(URL, 'revokeObjectURL')
+    try {
+      const promise = shrinkImage(new File(['fictional'], 'fictional.jpg', { type: 'image/jpeg' }))
+      triggerLoad()
+      await expect(promise).rejects.toThrow('invalid dimensions')
+      expect(revoke).toHaveBeenCalled()
+    } finally {
+      restore()
+    }
+  })
+  it('rejects oversized input before allocating a decoder', async () => {
+    const file = new File(['fictional'], 'fictional.jpg', { type: 'image/jpeg' })
+    Object.defineProperty(file, 'size', { value: 21 * 1024 * 1024 })
+    await expect(shrinkImage(file)).rejects.toThrow('20 MB')
+  })
+})
+
+it('times out a stalled decoder and releases the object URL', async () => {
+  vi.useFakeTimers()
+  const { restore, latest } = stubImageAndCanvas()
+  const revoke = vi.spyOn(URL, 'revokeObjectURL')
+  try {
+    const promise = shrinkImage(new File(['fictional'], 'fictional.jpg', { type: 'image/jpeg' }))
+    const assertion = expect(promise).rejects.toThrow('timed out')
+    await vi.advanceTimersByTimeAsync(15_000)
+    await assertion
+    expect(revoke).toHaveBeenCalledWith(latest().src)
+  } finally {
+    restore()
+    vi.useRealTimers()
+  }
 })

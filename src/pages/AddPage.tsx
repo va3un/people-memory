@@ -1,242 +1,251 @@
+// Quick add and editing keep drafts intact when validation, image decoding or storage fails.
 import { useEffect, useRef, useState } from 'react'
 import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { showToast } from '../components/ui/Toast'
-import { createPerson, createPhoto, createRelationship, getPeople, personDefaults } from '../db/typed'
-import type { Person } from '../db/schema'
-import { shrinkImage } from '../lib/image'
+import { useUnsavedDraft } from '../lib/useUnsavedDraft'
+import { PersonDetailsFields } from '../components/PersonDetailsFields'
+import { getPeople, personDefaults, type NewPerson } from '../db/typed'
+import { savePerson } from '../db/people'
+import type { Person, Photo, RelationshipType } from '../db/schema'
+import { RelatedPersonFields } from '../components/RelatedPersonFields'
 
-// The Add screen. Quick form from roadmap section 11.3: photo, name, how you
-// know them, optional "Related to", and a fold-out for more details. Saving
-// creates a person (and photo) in the phone's database.
-export function AddPage() {
+export function AddPage({
+  original,
+  existingPhoto,
+  onSaved,
+}: {
+  original?: Person
+  existingPhoto?: Photo
+  onSaved?: (person: Person) => void
+}) {
   const [people, setPeople] = useState<Person[]>([])
-  const [name, setName] = useState('')
-  const [howIKnow, setHowIKnow] = useState('')
+  const [values, setValues] = useState<NewPerson>(() => original ?? personDefaults(''))
   const [relatedTo, setRelatedTo] = useState('')
-  const [phone, setPhone] = useState('')
-  const [city, setCity] = useState('')
-  const [notes, setNotes] = useState('')
-  const [nicknames, setNicknames] = useState('')
+  const [relationshipType, setRelationshipType] = useState<RelationshipType>('other')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string>()
+  const [removedPhoto, setRemovedPhoto] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [moreOpen, setMoreOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(!!original)
+  const [error, setError] = useState('')
+  const [savedId, setSavedId] = useState<string>()
+  const [dirty, setDirty] = useState(false)
+  const busy = useRef(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const errorRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
-    void getPeople().then(setPeople)
-  }, [])
-
-  const hasChanges = name.length > 0
-
-  const pickPhoto = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] ?? null
-    if (!file) return
-    if (!file.type.startsWith('image/')) {
-      showToast({ message: 'Please pick an image file.' })
+    void getPeople()
+      .then(setPeople)
+      .catch(() => setError('Could not load people. Try reopening the app.'))
+  }, [savedId])
+  useEffect(() => {
+    const blob = photoFile ?? (!removedPhoto ? existingPhoto?.blob : undefined)
+    if (!blob) {
+      setPhotoPreview(undefined)
       return
     }
-    setPhotoFile(file)
-    setPhotoPreview(URL.createObjectURL(file))
-  }
+    const url = URL.createObjectURL(blob)
+    setPhotoPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [photoFile, removedPhoto, existingPhoto])
+  useEffect(() => {
+    if (error) errorRef.current?.focus()
+  }, [error])
+  useUnsavedDraft(dirty)
 
+  const change = (changes: Partial<NewPerson>) => {
+    setValues((v) => ({ ...v, ...changes }))
+    setDirty(true)
+    setSavedId(undefined)
+  }
   const removePhoto = () => {
-    if (photoPreview) URL.revokeObjectURL(photoPreview)
     setPhotoFile(null)
-    setPhotoPreview(null)
-  }
-
-  const resetForm = () => {
-    setName('')
-    setHowIKnow('')
-    setRelatedTo('')
-    setPhone('')
-    setCity('')
-    setNotes('')
-    setNicknames('')
+    setRemovedPhoto(true)
+    setDirty(true)
     if (fileInputRef.current) fileInputRef.current.value = ''
-    removePhoto()
   }
-
-
+  const resetForm = () => {
+    setValues(personDefaults(''))
+    setRelatedTo('')
+    setRelationshipType('other')
+    setPhotoFile(null)
+    setRemovedPhoto(false)
+    setDirty(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
   const save = async (addAnother: boolean) => {
-    if (!hasChanges) return
+    if (busy.current || !values.full_name.trim()) return
+    busy.current = true
     setSaving(true)
+    setError('')
     try {
-      const person = await createPerson({
-        ...personDefaults(name),
-        how_i_know: howIKnow || undefined,
-        city: city || undefined,
-        notes: notes || undefined,
-        nicknames: nicknames.split(',').map((n) => n.trim()).filter(Boolean),
-        phones: phone ? [phone] : [],
+      const person = await savePerson({
+        values: {
+          ...values,
+          display_name: values.display_name.trim() || values.full_name.trim().split(/\s+/)[0],
+          phones: values.phones.map((p) => p.trim()).filter(Boolean),
+          nicknames: values.nicknames.map((n) => n.trim()).filter(Boolean),
+        },
+        original,
+        photo: photoFile,
+        removePhoto: removedPhoto,
+        relativeId: relatedTo || undefined,
+        relationshipType,
       })
-
-      if (photoFile) {
-        const { blob, mime, width, height, bytes } = await shrinkImage(photoFile)
-        await createPhoto({
-          person_id: person.id,
-          blob,
-          mime,
-          width,
-          height,
-          bytes,
-        })
-      }
-
-      if (relatedTo) {
-        await createRelationship({
-          person_id: person.id,
-          relative_id: relatedTo,
-          type: 'other',
-        })
-      }
-
+      setDirty(false)
+      setSavedId(person.id)
       showToast({ message: `Saved ${person.display_name}` })
-
-      if (addAnother) {
-        resetForm()
-      }
+      if (!original) resetForm()
+      onSaved?.(person)
+      if (addAnother) fileInputRef.current?.focus()
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Could not save. Your draft is still here. Try again.',
+      )
     } finally {
+      busy.current = false
       setSaving(false)
     }
   }
-
   return (
     <main className="page mx-auto w-full max-w-md pb-28 pt-6">
-      <h1 className="page-title">Add</h1>
-      <p className="mt-1 text-sm text-muted">Save someone new to your people list.</p>
-
-      <Card className="mt-5 p-4">
-        <p className="section-label">Quick add</p>
-
-        <div className="mt-3 flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-text">Photo</label>
+      <h1 className="page-title">{original ? 'Edit person' : 'Add'}</h1>
+      <p className="mt-2 text-base text-muted">
+        {original ? 'Update this profile.' : 'Quick add: save someone new.'}
+      </p>
+      <p className="mt-2 text-base text-muted">
+        Stored unencrypted on this device. Backup is not available yet. Use fictional test data
+        only.
+      </p>
+      {savedId && !original && (
+        <a
+          className="mt-3 inline-flex min-h-12 items-center text-accent underline"
+          href={`#/people/${savedId}`}
+        >
+          View saved person
+        </a>
+      )}
+      <form
+        data-unsaved={dirty || undefined}
+        onSubmit={(e) => {
+          e.preventDefault()
+          void save(false)
+        }}
+      >
+        <Card className="mt-5 p-4">
+          <p className="section-label">Quick add</p>
+          {error && (
+            <p ref={errorRef} tabIndex={-1} role="alert" className="my-3 text-danger">
+              {error} Your draft has been kept.
+            </p>
+          )}
+          <fieldset disabled={saving} className="mt-3 flex min-w-0 flex-col gap-3">
+            <label htmlFor="photo">Photo (camera or gallery)</label>
             <input
+              id="photo"
               type="file"
               accept="image/*"
               aria-label="Photo"
-              className="block w-full text-sm text-muted"
-              onChange={pickPhoto}
+              className="min-h-12 w-full"
               ref={fileInputRef}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                if (!file.type.startsWith('image/')) {
+                  setError('Please pick an image file.')
+                  e.target.value = ''
+                  return
+                }
+                if (file.size > 20 * 1024 * 1024) {
+                  setError('Choose a photo smaller than 20 MB.')
+                  e.target.value = ''
+                  return
+                }
+                setPhotoFile(file)
+                setRemovedPhoto(false)
+                setDirty(true)
+                setError('')
+              }}
             />
-          </div>
-          {photoFile && (
-            <div className="flex items-center gap-3">
-              <Avatar name={name || 'Person'} src={photoPreview} size={56} />
-              <Button variant="danger" size="sm" onClick={removePhoto} className="shrink-0">
-                Remove
-              </Button>
-              <p className="text-sm text-muted flex-1">Photo will be shrunk to save space.</p>
-            </div>
-          )}
-
-          <Input
-            name="full_name"
-            label="Full name"
-            placeholder="Meera Joshi"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            aria-label="Full name"
-          />
-          <Input
-            name="how_i_know"
-            label="How do I know them?"
-            placeholder="Type a line, for example &quot;School friend&quot;"
-            value={howIKnow}
-            onChange={(event) => setHowIKnow(event.target.value)}
-            aria-label="How do I know them?"
-          />
-
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-text">Related to</label>
-            <select
-              value={relatedTo}
-              onChange={(event) => setRelatedTo(event.target.value)}
-              className="flex-1 h-12 w-full rounded-2xl border border-border bg-surface px-4 text-base text-text focus:border-accent focus:outline-none"
-              aria-label="Related to"
+            {photoPreview && (
+              <div className="flex items-center gap-3">
+                <Avatar name={values.full_name || 'Person'} src={photoPreview} />
+                <Button variant="danger" onClick={removePhoto}>
+                  Remove photo
+                </Button>
+              </div>
+            )}
+            <Input
+              name="full_name"
+              label="Full name"
+              required
+              value={values.full_name}
+              onChange={(e) => change({ full_name: e.target.value })}
+            />
+            <Input
+              name="how_i_know"
+              label="How do I know them?"
+              value={values.how_i_know ?? ''}
+              onChange={(e) => change({ how_i_know: e.target.value })}
+            />
+            {!original && (
+              <RelatedPersonFields
+                people={people}
+                values={values}
+                relatedTo={relatedTo}
+                relationshipType={relationshipType}
+                onPerson={(id) => {
+                  setRelatedTo(id)
+                  setDirty(true)
+                }}
+                onType={(type) => {
+                  setRelationshipType(type)
+                  setDirty(true)
+                }}
+              />
+            )}
+            <Button
+              variant="ghost"
+              aria-expanded={moreOpen}
+              aria-controls="person-details"
+              onClick={() => setMoreOpen(!moreOpen)}
             >
-              <option value="">None</option>
-              {people.map((person) => (
-                <option key={person.id} value={person.id}>
-                  {person.full_name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setMoreOpen(!moreOpen)}
-            className="w-full justify-start text-sm"
-          >
-            {moreOpen ? 'Hide' : 'More details'} ▾
-          </Button>
-          {moreOpen && (
-            <div className="mt-3 flex flex-col gap-3 border-t border-border pt-3">
-              <Input
-                name="phone"
-                label="Phone"
-                placeholder="+91 98765 43210"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                aria-label="Phone"
-              />
-              <Input
-                name="city"
-                label="City"
-                placeholder="Pune"
-                value={city}
-                onChange={(event) => setCity(event.target.value)}
-                aria-label="City"
-              />
-              <Input
-                name="nicknames"
-                label="Nicknames"
-                placeholder="Mera, मीरा"
-                value={nicknames}
-                onChange={(event) => setNicknames(event.target.value)}
-                aria-label="Nicknames"
-                hint="Separate with commas."
-              />
-              <Input
-                name="notes"
-                label="Notes"
-                placeholder="Anything else you want to remember"
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                aria-label="Notes"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="mt-5 flex flex-col sm:flex-row sm:gap-2">
-          <Button
-            size="lg"
-            disabled={!hasChanges || saving}
-            onClick={() => save(false)}
-            className="w-full sm:w-1/2"
-          >
-            {saving ? 'Saving…' : 'Save'}
-          </Button>
-          <Button
-            variant="secondary"
-            size="lg"
-            disabled={!hasChanges || saving}
-            onClick={() => save(true)}
-            className="w-full sm:w-1/2"
-          >
-            Save and add another
-          </Button>
-        </div>
-      </Card>
+              {moreOpen ? 'Hide details' : 'More details'}
+            </Button>
+            {moreOpen && (
+              <div id="person-details">
+                <PersonDetailsFields values={values} change={change} />
+              </div>
+            )}
+            <Button type="submit" disabled={!values.full_name.trim() || saving}>
+              {saving ? 'Saving…' : 'Save'}
+            </Button>
+            {!original && (
+              <Button
+                variant="secondary"
+                disabled={!values.full_name.trim() || saving}
+                onClick={() => void save(true)}
+              >
+                Save and add another
+              </Button>
+            )}
+            {original && (
+              <a
+                className="flex min-h-12 items-center justify-center text-accent"
+                href={`#/people/${original.id}`}
+              >
+                Cancel
+              </a>
+            )}
+          </fieldset>
+        </Card>
+      </form>
     </main>
   )
 }
-
