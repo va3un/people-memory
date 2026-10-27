@@ -1,5 +1,5 @@
 # Latest report
-Phase 3 stabilization, 27 October 2026. The previously missing Phase 3 flows are implemented on `fix/complete-phase-3`. Independent review and physical-device acceptance are still pending. Phase 4 has not started.
+Phase 3 accepted, 27 October 2026. Varun confirmed that code review and manual acceptance tests on desktop and Android passed. The implementation was merged in [PR #1](https://github.com/va3un/people-memory/pull/1). Phase 4 has not started.
 
 What was done
 - Added a reactive newest-first people list, profiles, editing, photo display/replacement/removal, contact actions, and optional details including birthday with an optional year.
@@ -16,7 +16,9 @@ What was done
 - A prompted upgrade from the previously audited build preserved its saved fictional record. Repeated offline reloads after the upgrade passed without a blank screen or update loop.
 - No npm dependencies were added or upgraded. The available Python Playwright/Chromium tools supplied browser checks; temporary Prettier 3.6.2 formatted changed source files without changing the lockfile.
 
-Please test (fictional data only, after review and a separately authorized deployment)
+Manual acceptance (passed on desktop and Android, confirmed by Varun on 27 October 2026)
+The acceptance checklist is retained below. This records the user-confirmed result; no new manual test run was performed for this documentation update.
+
 1. Android Chrome: open the app, install from the Chrome menu, then Add a fictional person with a camera/gallery photo. Confirm the form can be completed in under 20 seconds. Close and reopen in airplane mode, then open the saved profile.
 2. On the profile, tap Edit person, replace the photo, Save, and confirm orientation/cropping. Edit again, Remove photo, Save, and confirm initials appear.
 3. Add a fictional parent, then add a fictional child using Related to and the Child type. Open each profile and confirm the reverse parent/child labels.
@@ -30,7 +32,7 @@ Decisions I made
 - Kept Phase 4 context/Me/relationship-management features and Phase 5 clue search out of this change. Existing quick-add links can be viewed in both directions, as requested for Phase 3 stabilization.
 
 Need from you
-- No technical decision is blocking the code. Independent PR review and the physical-device checks above remain before treating Phase 3 as accepted. Do not begin Phase 4 automatically.
+- None for Phase 3 acceptance. Phase 4 has not started; this documentation update does not authorize starting it.
 
 # Superseded report: partial Phase 3
 This earlier completion claim was incorrect. The people list, profile, editing and delete/Undo were still missing at that point.
@@ -107,7 +109,7 @@ Need from you
 - None. The Airtable rehearsal uses invented column names. If you remember the real column names from the old Airtable base, tell me and I will match them before Phase 11.
 
 # Current phase
-Phase 3: People, photos and quick add. Implementation complete and locally verified; independent review and physical-device acceptance pending. Phase 4 has not started.
+Phase 3: People, photos and quick add. Accepted on 27 October 2026 after successful code review and desktop and Android manual acceptance tests, confirmed by Varun. Phase 4 has not started.
 
 # Done
 - GitHub account verified.
@@ -117,13 +119,11 @@ Phase 3: People, photos and quick add. Implementation complete and locally verif
 - Phase 1: empty app, design system and live install.
 - Rules file renamed to .clinerules and cleaned, so Cline loads it.
 - Phase 2: Dexie data layer, domain rules, sample data, Settings developer tools, storage status, Airtable mapping rehearsal.
-- Phase 3: people list, profile, editing, atomic quick add with photos and relationship types, and soft delete with 10-second Undo. All 172 tests, typecheck and production build pass locally. Awaiting independent review and physical-device acceptance; the earlier commit 8ad341b implemented only part of this phase.
+- Phase 3: people list, profile, editing, atomic quick add with photos and relationship types, and soft delete with 10-second Undo. All 172 tests, typecheck and production build pass locally. Code review and desktop and Android manual acceptance tests passed, confirmed by Varun on 27 October 2026. Phase 3 is accepted; the earlier commit 8ad341b implemented only part of this phase.
 
 # Known problems
-- Android installation, camera/EXIF orientation, the under-20-second quick-add target, larger system fonts and Windows Call/WhatsApp integration still need hands-on acceptance. Desktop Chromium automation is not a physical phone test.
 - Storage is unencrypted and local to this browser. Backup/export and Dropbox sync remain later phases. Use fictional test data only; clearing browser data or losing the device loses records.
 - One low-severity npm advisory remains in build tooling: serialize-javascript 7.1.2 through Workbox. No dependency versions were changed in this phase.
-- GitHub Actions results must be checked on the review branch/PR. No deployment was performed.
 
 # Decisions made
 - Follow roadmap v3.
