@@ -2,6 +2,8 @@ import { Route, Routes } from 'react-router-dom'
 import { BottomNav } from './components/layout/BottomNav'
 import { Toaster } from './components/ui/Toast'
 import { usePwaUpdate } from './lib/usePwaUpdate'
+import { PersonPage } from './pages/PersonPage'
+import { EditPersonPage } from './pages/EditPersonPage'
 import { AddPage } from './pages/AddPage'
 import { BrowsePage } from './pages/BrowsePage'
 import { DesignPage } from './pages/DesignPage'
@@ -16,6 +18,8 @@ export function App() {
     <div className="min-h-dvh bg-background text-text">
       <Routes>
         <Route path="/" element={<SearchPage />} />
+        <Route path="/people/:id" element={<PersonPage />} />
+        <Route path="/people/:id/edit" element={<EditPersonPage />} />
         <Route path="/add" element={<AddPage />} />
         <Route path="/browse" element={<BrowsePage />} />
         <Route path="/settings" element={<SettingsPage />} />

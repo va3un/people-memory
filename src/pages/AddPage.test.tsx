@@ -228,3 +228,46 @@ describe('add quick add form', () => {
 
     unmount()
   })
+
+
+describe('save failure recovery', () => {
+  it('keeps Save disabled for whitespace-only names', async () => {
+    const { container, unmount } = await renderAdd()
+    await setInputValue(container, 'full_name', '   ')
+    expect(buttonByText(container, 'Save')?.disabled).toBe(true)
+    expect(await db.people.count()).toBe(0)
+    unmount()
+  })
+  it('retains the draft after a photo failure and saves exactly once on retry', async () => {
+    const { container, unmount } = await renderAdd()
+    await setInputValue(container, 'full_name', 'Fictional Retry')
+    await pickPhoto(container)
+    vi.mocked(shrinkImage).mockRejectedValueOnce(new Error('Fictional photo failed'))
+    await act(async () => {
+      buttonByText(container, 'Save')?.click()
+      await new Promise(r => setTimeout(r, 20))
+    })
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain('draft has been kept')
+    expect((container.querySelector('[name="full_name"]') as HTMLInputElement).value).toBe('Fictional Retry')
+    expect(await db.people.count()).toBe(0)
+    await act(async () => {
+      buttonByText(container, 'Save')?.click()
+      await new Promise(r => setTimeout(r, 20))
+    })
+    expect(await db.people.count()).toBe(1)
+    expect(await db.photos.count()).toBe(1)
+    unmount()
+  })
+  it('releases preview URLs when a photo is replaced and the screen closes', async () => {
+    const revoke = vi.spyOn(URL, 'revokeObjectURL')
+    const { container, unmount } = await renderAdd()
+    await pickPhoto(container)
+    const first = container.querySelector('img')?.src
+    await pickPhoto(container)
+    expect(revoke).toHaveBeenCalledWith(first)
+    const second = container.querySelector('img')?.src
+    unmount()
+    expect(revoke).toHaveBeenCalledWith(second)
+    revoke.mockRestore()
+  })
+})

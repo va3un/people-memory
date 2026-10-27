@@ -12,7 +12,7 @@ export function Input({ label, hint, className = '', id, ...rest }: InputProps) 
   return (
     <div className="flex flex-col gap-1.5">
       {label ? (
-        <label htmlFor={inputId} className="text-sm font-medium text-text">
+        <label htmlFor={inputId} className="text-base font-medium text-text">
           {label}
         </label>
       ) : null}
@@ -21,7 +21,7 @@ export function Input({ label, hint, className = '', id, ...rest }: InputProps) 
         className={`h-12 w-full rounded-2xl border border-border bg-surface px-4 text-base text-text placeholder:text-muted focus:border-accent focus:outline-none ${className}`}
         {...rest}
       />
-      {hint ? <p className="text-xs text-muted">{hint}</p> : null}
+      {hint ? <p className="text-[13px] leading-[18px] text-muted">{hint}</p> : null}
     </div>
   )
 }

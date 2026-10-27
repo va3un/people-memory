@@ -1,7 +1,7 @@
 // Counts of every kind of record, used by the developer tools in Settings.
 import type { Table } from 'dexie'
 import { db } from './database'
-import { buildSampleData, isSameSampleContent, isSampleId, sampleRecordIds } from './sampleData'
+import { buildSampleData, isSameSampleContent, sampleRecordIds } from './sampleData'
 import type { BaseRecord } from './schema'
 
 export type RecordCounts = {
@@ -75,12 +75,8 @@ async function putOnlyMissing<T extends BaseRecord>(
       continue
     }
     if (!existing.deleted) continue
-    if (!knownIds.has(existing.id)) continue
-    // A record the user has edited keeps its own content. An untouched one
-    // is replaced by the fresh sample row, so new sample fields show up.
-    const restored = isSameSampleContent(existing, row)
-      ? { ...row, created_at: existing.created_at, updated_at: now, deleted: false }
-      : { ...existing, updated_at: now, deleted: false }
+    if (!knownIds.has(existing.id) || !isSameSampleContent(existing, row)) continue
+    const restored = { ...row, created_at: existing.created_at, updated_at: now, deleted: false }
     restore.push(restored)
   }
 
@@ -96,22 +92,59 @@ export async function softDeleteSampleData(): Promise<void> {
     'rw',
     [db.people, db.contexts, db.memberships, db.relationships, db.photos, db.captureBatches],
     async () => {
-      await markSampleDeleted(db.people, now)
-      await markSampleDeleted(db.contexts, now)
-      await markSampleDeleted(db.memberships, now)
-      await markSampleDeleted(db.relationships, now)
-      await markSampleDeleted(db.photos, now)
-      await markSampleDeleted(db.captureBatches, now)
+      const sample = buildSampleData()
+      const known = sampleRecordIds()
+      // Preserve fixture endpoints used by new links or photos, and edited fixture rows.
+      const protectedIds = new Set<string>()
+      for (const photo of await db.photos.filter((row) => !row.deleted).toArray())
+        protectedIds.add(photo.person_id)
+      for (const link of await db.relationships.filter((row) => !row.deleted).toArray()) {
+        const fixture = sample.relationships.find((row) => row.id === link.id)
+        if (!known.has(link.id) || !fixture || !isSameSampleContent(link, fixture)) {
+          protectedIds.add(link.person_id)
+          protectedIds.add(link.relative_id)
+        }
+      }
+      for (const link of await db.memberships.filter((row) => !row.deleted).toArray()) {
+        const fixture = sample.memberships.find((row) => row.id === link.id)
+        if (!known.has(link.id) || !fixture || !isSameSampleContent(link, fixture)) {
+          protectedIds.add(link.person_id)
+          protectedIds.add(link.context_id)
+        }
+      }
+      for (const row of await db.people.toArray()) {
+        const fixture = sample.people.find((person) => person.id === row.id)
+        if (fixture && !isSameSampleContent(row, fixture)) protectedIds.add(row.id)
+      }
+      for (const row of await db.contexts.toArray()) {
+        const fixture = sample.contexts.find((context) => context.id === row.id)
+        if (fixture && !isSameSampleContent(row, fixture)) protectedIds.add(row.id)
+      }
+      await markSampleDeleted(db.people, sample.people, protectedIds, now)
+      await markSampleDeleted(db.contexts, sample.contexts, protectedIds, now)
+      await markSampleDeleted(db.memberships, sample.memberships, protectedIds, now)
+      await markSampleDeleted(db.relationships, sample.relationships, protectedIds, now)
     },
   )
 }
 
-// Marks only the records whose id shows they are fictional sample data.
-async function markSampleDeleted<T extends BaseRecord>(table: Table<T, string>, now: string) {
-  const sampleIds = (await table.toCollection().filter((row) => isSampleId(row.id)).primaryKeys())
-  if (sampleIds.length === 0) return
-  await table.where('id').anyOf(sampleIds).modify((row) => {
-    row.deleted = true
-    row.updated_at = now
-  })
+// Delete only unchanged, known fixtures; an ID prefix never establishes ownership.
+async function markSampleDeleted<T extends BaseRecord>(
+  table: Table<T, string>,
+  fixtures: T[],
+  protectedIds: Set<string>,
+  now: string,
+) {
+  for (const fixture of fixtures) {
+    const row = await table.get(fixture.id)
+    if (!row || protectedIds.has(row.id) || !isSameSampleContent(row, fixture)) continue
+    const endpoints = row as T & { person_id?: string; relative_id?: string; context_id?: string }
+    if (
+      [endpoints.person_id, endpoints.relative_id, endpoints.context_id].some(
+        (id) => id && protectedIds.has(id),
+      )
+    )
+      continue
+    await table.put({ ...row, deleted: true, updated_at: now })
+  }
 }

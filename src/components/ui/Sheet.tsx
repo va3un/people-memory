@@ -1,4 +1,5 @@
-import { useEffect, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { useModalFocus } from '../../lib/useModalFocus'
 
 export type SheetProps = {
   open: boolean
@@ -9,14 +10,7 @@ export type SheetProps = {
 
 // A bottom sheet, the preferred picker on phones (roadmap section 11.2).
 export function Sheet({ open, onClose, title, children }: SheetProps) {
-  useEffect(() => {
-    if (!open) return
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose])
+  const modalRef = useModalFocus(open, onClose)
 
   if (!open) return null
 
@@ -29,6 +23,8 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
       />
       <div
+        ref={modalRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={title}

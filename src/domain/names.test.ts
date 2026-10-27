@@ -22,6 +22,11 @@ describe('normalizeName', () => {
     expect(normalizeName('Chétana')).toBe('chetana')
   })
 
+  it('matches composed and decomposed Latin accents without normalising Devanagari', () => {
+    expect(normalizeName('Che\u0301tana')).toBe(normalizeName('Chétana'))
+    expect(normalizeName('ऩ मीरा')).toBe('ऩ मीरा')
+  })
+
   it('removes extra spaces', () => {
     expect(normalizeName('  Anil   Joshi ')).toBe('anil joshi')
   })

@@ -1,4 +1,40 @@
 # Latest report
+Phase 3 stabilization, 27 October 2026. The previously missing Phase 3 flows are implemented on `fix/complete-phase-3`. Independent review and physical-device acceptance are still pending. Phase 4 has not started.
+
+What was done
+- Added a reactive newest-first people list, profiles, editing, photo display/replacement/removal, contact actions, and optional details including birthday with an optional year.
+- Quick add supports all existing relationship types with an explicit direction sentence. One stored link displays reciprocal labels on the two profiles. This does not add the Phase 4 Add relative sheet, context management, Browse implementation or Me onboarding.
+- Person, photo and quick-add relationship writes now commit in one IndexedDB transaction. Image processing and validation finish before the transaction. Failed saves retain the draft and show an accessible error; retry does not leave a partial person. Blank names and invalid birthdays are rejected. Successful quick adds reset the form to prevent accidental duplicate saves.
+- Edits preserve record IDs, creation times, unedited fields and the existing database schema. Stale edits/deletes from another tab are rejected. Deletion soft-deletes the person, retains photos and links, and offers Undo for 10 seconds. Undo checks its deadline and refuses to overwrite subsequent changes.
+- Photos are locally encoded as JPEG at quality 0.8 and at most 600 pixels on the long side. Added input/dimension limits, a processing timeout, white transparency background, decode/encode failure recovery, and object-URL cleanup.
+- Increased small-button/tab targets to 48 pixels, improved form labels and text scaling, and added modal focus trapping/restoration. App links, reloads and update prompts warn before discarding a draft.
+- Storage notices explain unencrypted local data and the absence of backup. Added a production-only Content Security Policy. Edited sample fixtures, unknown prefixed IDs, and samples used by new photos/links are protected from sample deletion. Loading samples no longer resurrects edited deleted fixtures.
+- Fixed composed/decomposed Latin accent matching while keeping Devanagari intact.
+- Added a branch/PR CI workflow for typecheck, tests and build with read-only repository permissions and no deployment. The existing main-branch Pages deployment workflow is unchanged.
+- Validation: typecheck passed; 172 tests across 15 files passed; the GitHub Pages-path production build passed. Regression coverage includes transaction rollback, retry, stale edits, photo failures/cleanup, sample safety, reciprocal labels, profile/list/editor integration, Undo expiry and draft protection during updates.
+- Production Chromium checks cover corrupt-photo recovery, real PNG-to-JPEG conversion, photo replacement/removal, quick add, birthday, profiles/editing, one-row reciprocal links, keyboard focus, delete/Undo and its real deadline, concurrent editing, newest-first listing, offline reopening/add/edit, dark mode, reduced motion and CSP. No uncaught page errors or third-party requests occurred in the tested core flow. The repeatable check is `python scripts/check-phase3-browser.py` after building, with free Python Playwright and Chromium available.
+- A prompted upgrade from the previously audited build preserved its saved fictional record. Repeated offline reloads after the upgrade passed without a blank screen or update loop.
+- No npm dependencies were added or upgraded. The available Python Playwright/Chromium tools supplied browser checks; temporary Prettier 3.6.2 formatted changed source files without changing the lockfile.
+
+Please test (fictional data only, after review and a separately authorized deployment)
+1. Android Chrome: open the app, install from the Chrome menu, then Add a fictional person with a camera/gallery photo. Confirm the form can be completed in under 20 seconds. Close and reopen in airplane mode, then open the saved profile.
+2. On the profile, tap Edit person, replace the photo, Save, and confirm orientation/cropping. Edit again, Remove photo, Save, and confirm initials appear.
+3. Add a fictional parent, then add a fictional child using Related to and the Child type. Open each profile and confirm the reverse parent/child labels.
+4. On a fictional profile tap Delete person, Confirm delete, then Undo within 10 seconds. Confirm photo and links return. Repeat deletion and wait beyond 10 seconds to confirm Undo expires.
+5. Check large system text, light/dark mode and keyboard navigation. On a safe fictional profile, manually check Copy number and device handling of Call/WhatsApp without contacting anyone.
+
+Decisions I made
+- Kept all schema versions, tables, fields, existing photo IDs and fixtures compatible. Replacements reuse an existing photo row; removals use tombstones. No data-model migration was introduced.
+- Kept photos and relationships when soft-deleting a person so Undo cannot lose them. Views exclude deleted endpoints. The Undo deadline is enforced even if a browser pauses the toast timer.
+- Chose 20 MB input and 40-million-pixel limits plus a 15-second image timeout to bound photo processing. The UI explains failures and lets the user remove or replace the photo before retrying.
+- Kept Phase 4 context/Me/relationship-management features and Phase 5 clue search out of this change. Existing quick-add links can be viewed in both directions, as requested for Phase 3 stabilization.
+
+Need from you
+- No technical decision is blocking the code. Independent PR review and the physical-device checks above remain before treating Phase 3 as accepted. Do not begin Phase 4 automatically.
+
+# Superseded report: partial Phase 3
+This earlier completion claim was incorrect. The people list, profile, editing and delete/Undo were still missing at that point.
+
 Phase 3 is built. The Add screen now lets you add a photo and quickly link a new person to someone you already know.
 
 What was done
@@ -71,7 +107,7 @@ Need from you
 - None. The Airtable rehearsal uses invented column names. If you remember the real column names from the old Airtable base, tell me and I will match them before Phase 11.
 
 # Current phase
-Phase 3: Photo support and related-person quick-add
+Phase 3: People, photos and quick add. Implementation complete and locally verified; independent review and physical-device acceptance pending. Phase 4 has not started.
 
 # Done
 - GitHub account verified.
@@ -81,10 +117,13 @@ Phase 3: Photo support and related-person quick-add
 - Phase 1: empty app, design system and live install.
 - Rules file renamed to .clinerules and cleaned, so Cline loads it.
 - Phase 2: Dexie data layer, domain rules, sample data, Settings developer tools, storage status, Airtable mapping rehearsal.
-- Phase 3: photo support and related-person quick-add on the Add screen; all 145 tests pass, typecheck and production build pass; committed as 8ad341b and pushed to GitHub.
+- Phase 3: people list, profile, editing, atomic quick add with photos and relationship types, and soft delete with 10-second Undo. All 172 tests, typecheck and production build pass locally. Awaiting independent review and physical-device acceptance; the earlier commit 8ad341b implemented only part of this phase.
 
 # Known problems
-- None.
+- Android installation, camera/EXIF orientation, the under-20-second quick-add target, larger system fonts and Windows Call/WhatsApp integration still need hands-on acceptance. Desktop Chromium automation is not a physical phone test.
+- Storage is unencrypted and local to this browser. Backup/export and Dropbox sync remain later phases. Use fictional test data only; clearing browser data or losing the device loses records.
+- One low-severity npm advisory remains in build tooling: serialize-javascript 7.1.2 through Workbox. No dependency versions were changed in this phase.
+- GitHub Actions results must be checked on the review branch/PR. No deployment was performed.
 
 # Decisions made
 - Follow roadmap v3.

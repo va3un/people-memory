@@ -38,11 +38,10 @@ describe('app shell', () => {
     unmount()
   })
 
-  it('shows the Search screen with the search box', async () => {
+  it('shows the Phase 3 people list', async () => {
     const { container, unmount } = await renderApp()
     expect(container.textContent).toContain('Search')
-    const input = container.querySelector('input[name="search"]')
-    expect(input).not.toBeNull()
+    expect(container.textContent).toContain('Your people, newest first')
     unmount()
   })
 
