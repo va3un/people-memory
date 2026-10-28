@@ -1,4 +1,35 @@
 # Latest report
+Phase 4 implementation, 28 October 2026. All Phase 4 tasks are implemented on `feature/phase-4` and locally verified. Independent review and physical-phone acceptance remain pending. Phase 5 has not started.
+
+What was done
+- Added a context picker and creator in bottom sheets inside Quick add and profiles. Choices include kind, optional city, role and period. Quick-add contexts remain drafts until the person save succeeds; cancelling a sheet writes nothing. Profile linking commits the context and membership together.
+- Replaced the Browse placeholder with live Contexts and Categories tabs and member counts. Context detail lists each active member once with their roles and periods, and Add person here preselects the context in Quick add. Category detail lists matching ordinary people.
+- Added the Add relative sheet: choose an existing person or create a fictional new one, choose a relationship type and inspect a direction sentence before saving. New person plus relationship save atomically. Repeating the same link from either direction reuses one row; the reverse display uses the existing domain labels. Profiles now show Family and relatives and Known through.
+- Added first-run About you setup for a fictional Me name with optional school, college, workplace, society, group or place contexts. Existing people, photos, links, IDs and timestamps are preserved. Me appears in Settings and linked context details while remaining hidden from the normal people list. Existing active Me profiles skip setup; concurrent setup cannot create two Me profiles. Fixture loading cannot introduce a second Me.
+- Preserved the Phase 3 quick-add, photo, edit, stale-write protection and delete/10-second Undo flows. Me is edited rather than deleted from its profile, maintaining the single active Me identity. Photo controls were extracted into a reusable component without changing encoding or limits.
+- Used the existing schema and database version; no migration, wipe, new runtime package or dependency update. Existing privacy notices, local-storage limits and unavailable backups remain. Temporary Prettier 3.6.2 was used only to format changed source files.
+- Validation passed: typecheck, all 197 tests across 18 files, production build with the GitHub Pages base path, and git diff whitespace checks. New regressions cover Phase 3 record/photo/link preservation, atomic rollback and retry, concurrent Me setup, duplicate/reverse links, membership counts, tombstones, context selection, rapid relative-save taps, first-run UI and context preselection.
+- Both production Chromium scripts passed: `scripts/check-phase3-browser.py` and `scripts/check-phase4-browser.py`. Checks include existing data preservation, optional Me contexts, reciprocal Husband/Wife labels with one spouse row, new relatives, profile context roles, cancellation without writes, Browse counts, Add person here, categories, offline reopen/context creation and no repeated onboarding. The tested flows had no uncaught page errors, CSP violations or third-party requests.
+- An installed-app update from the merged Phase 3 build to Phase 4 was also rehearsed on a disposable origin. First-run Me setup preserved the existing fictional person record exactly, retained its profile URL, and supported repeated offline reloads without repeated setup or an update loop.
+- No deployment was performed. The review branch runs the existing free GitHub Actions checks; production publishing remains gated on a separately approved merge.
+
+Please test (fictional data only, after review and an authorized deployment)
+1. In a separate test browser/profile, open the app, enter a fictional name on About you, optionally Add a context, then Continue. Confirm existing Phase 3 people remain. If an existing Me skips setup, open Settings, then Open your Me profile; do not clear existing data to force setup.
+2. Open a fictional person, tap Add relative, choose or create another fictional person, choose Spouse, inspect the sentence and Save relationship. Open both profiles and verify Husband/Wife where the corresponding genders are set; unknown gender should show Spouse.
+3. On a profile tap Add to a context, then Create context. Enter a fictional school or society, its kind and a role, then Use this context. Confirm it appears under Known through. Reopen the picker and Cancel a new draft; confirm no extra context appears.
+4. Tap Browse, open the context, check member roles/counts, then Add person here and save a fictional person. Confirm the new member appears in that context. Tap Categories to inspect the category counts and member list.
+5. After an online load, reopen the app in airplane mode. Confirm Me setup does not repeat and profiles, Browse, context creation and relative creation work. Do not delete or reset existing data during this check.
+
+Decisions I made
+- Setup creates a new Me record without silently converting or merging an existing ordinary person. All new multi-record operations use transactions on existing tables, and failed operations retain the draft for retry.
+- Existing Me profiles are respected. Me deletion from its profile is prevented; name and other details remain editable. Sample loading omits a conflicting sample Me and its fixture links instead of modifying the existing Me or other people.
+- Exact normalized context name/kind/city matches are reused without overwriting stored context notes. Identical person/context/role/period memberships are idempotent; distinct roles or periods remain separate. Context counts include Me and count people once, regardless of multiple roles.
+- Category browsing groups assigned free-text categories, excluding Me and deleted people. No MiniSearch index, clue matching, recents, Smart capture or other Phase 5/later work was added.
+
+Need from you
+- Independent PR review and the Phase 4 phone checks above are still needed before accepting this phase. No technical decision blocks the implementation. Phase 5 must wait for a separate instruction.
+
+# Previous report: Phase 3 acceptance
 Phase 3 accepted, 27 October 2026. Varun confirmed that code review and manual tests of Phase 3 core functionality on desktop and Android passed. Acceptance covers the verified core functionality, not every item in the original manual checklist. The implementation was merged in [PR #1](https://github.com/va3un/people-memory/pull/1). Phase 4 has not started.
 
 What was done
@@ -113,7 +144,7 @@ Need from you
 - None. The Airtable rehearsal uses invented column names. If you remember the real column names from the old Airtable base, tell me and I will match them before Phase 11.
 
 # Current phase
-Phase 3: People, photos and quick add. Accepted for verified core functionality on 27 October 2026 after successful code review and desktop and Android manual tests, confirmed by Varun. Enlarged system text, under-20-second quick add and Windows Call/WhatsApp handling remain outstanding acceptance observations. Phase 4 has not started.
+Phase 4: Contexts, relationships and the Me profile. Implementation and local automated/browser checks complete on 28 October 2026; independent review and Phase 4 phone acceptance pending. Phase 3 remains accepted for its verified core functionality, with its three outstanding observations retained below. Phase 5 has not started.
 
 # Done
 - GitHub account verified.
@@ -125,12 +156,17 @@ Phase 3: People, photos and quick add. Accepted for verified core functionality 
 - Phase 2: Dexie data layer, domain rules, sample data, Settings developer tools, storage status, Airtable mapping rehearsal.
 - Phase 3: people list, profile, editing, atomic quick add with photos and relationship types, and soft delete with 10-second Undo. All 172 tests, typecheck and production build pass locally. Code review and desktop and Android manual tests of core functionality passed, confirmed by Varun on 27 October 2026. Phase 3 is accepted for its verified core functionality, with the three acceptance observations above still outstanding; the earlier commit 8ad341b implemented only part of this phase.
 
+- Phase 4: context picker/creator in Quick add and profiles; live Browse/context/category details; atomic Add relative sheet with reverse labels; first-run Me setup and Settings access; 197 automated tests and both browser suites pass locally. Awaiting independent review and phone acceptance.
+
 # Known problems
+- Phase 4 has not yet received independent review or physical Android acceptance. Desktop Chromium automation and its mobile viewport are not a physical-phone test.
 - Outstanding acceptance observations, not explicitly verified: enlarged system text, under-20-second quick add, and Windows Call/WhatsApp handling. These are not confirmed defects and do not revoke acceptance of the verified Phase 3 core functionality.
 - Storage is unencrypted and local to this browser. Backup/export and Dropbox sync remain later phases. Use fictional test data only; clearing browser data or losing the device loses records.
 - One low-severity npm advisory remains in build tooling: serialize-javascript 7.1.2 through Workbox. No dependency versions were changed in this phase.
 
 # Decisions made
+- Phase 4 uses the existing schema and tables without migrations, wiping records or converting existing ordinary people into Me.
+- Context counts include Me when Me is a member and count each active person once; category counts cover assigned categories on ordinary people.
 - Follow roadmap v3.
 - Free tools and services only.
 - Never commit personal data to GitHub.
