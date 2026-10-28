@@ -22,7 +22,10 @@ Varun opens a new Cline chat and types: `Run Phase N of docs/ROADMAP.md.`
 Cline reads this file, `.clinerules` and `PROGRESS.md`, then does the whole phase without asking for plan approval.
 Cline commits after each finished task, runs the tests, pushes to GitHub, and checks that the deploy worked.
 Cline writes a report at the top of `PROGRESS.md` with four short parts: What was done, Please test (five checks at most, with exact taps), Decisions I made, Need from you (only if blocked).
-Varun tests on the phone and replies in the same Cline chat with "approved" or with what is wrong. If approved, he starts the next phase in a new chat.
+Approved hybrid testing workflow (28 October 2026): automated tests, typecheck, production build and independent pull-request review are required for each phase. Varun authorizes the next phase in a new chat after these checks and review.
+Routine phone/UI acceptance checks may be deferred until final testing. Keep deferred checks in `PROGRESS.md` as outstanding observations; never mark an unverified check as passed. Their deferral does not block routine phase progression.
+Critical backup/restore, Dropbox sync and real-data migration checks must be completed before those features are accepted. This includes successful backup restoration, the required multi-device sync and conflict/recovery checks, and the real-data migration verification and safeguards in the applicable phases. Automated mocks alone do not replace these critical checks.
+Deferral changes only the timing of routine phone/UI acceptance. All other roadmap requirements, safety checks, actual-service verification and review gates remain unchanged.
 1.3 When ChatGPT is used
 Kickoff, once.
 Design review: Varun pastes a phone screenshot and asks "review against section 11".
@@ -410,7 +413,7 @@ Exports never include the API key.
 Suggested habit: save the monthly export into `D:\Dropbox\People Memory App\backups\`.
 ---
 14. Build phases
-Each phase has Tasks, Cline self-checks, and Phone checks. Test with fictional data until the Phase 11 import has been reviewed. Do not ask Varun to clear real data as a casual phone check. Cline works through the tasks in order, commits after each, and ticks it off in `PROGRESS.md`. Do not start a phase until the previous one is approved.
+Each phase has Tasks, Cline self-checks, and Phone checks. Test with fictional data until the Phase 11 import has been reviewed. Do not ask Varun to clear real data as a casual phone check. Cline works through the tasks in order, commits after each, and ticks it off in `PROGRESS.md`. Apply the hybrid testing workflow in section 1.2: automated checks and independent PR review are required for every phase; routine Phone checks below may be deferred until final testing and must remain recorded as outstanding. Critical backup/restore, Dropbox sync and real-data migration checks cannot be deferred beyond acceptance of those features. Do not start a phase until the previous phase has passed its required checks and review and Varun authorizes progression.
 Phase 0: Accounts and workspace (Varun, guided by ChatGPT one step at a time)
 Create a GitHub account if needed. Do not add a payment method. Already completed.
 Create the public repository `people-memory` with a README. Already completed.
