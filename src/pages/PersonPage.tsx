@@ -8,7 +8,7 @@ import { Button } from '../components/ui/Button'
 import { Dialog } from '../components/ui/Dialog'
 import { showToast } from '../components/ui/Toast'
 import { deletePersonWithUndo, undoPersonDelete } from '../db/people'
-import { relationshipLabel, reverseType } from '../domain/relationships'
+import { ProfileConnections } from '../components/ProfileConnections'
 
 export function PersonPage() {
   const { id } = useParams()
@@ -23,19 +23,7 @@ export function PersonPage() {
       .equals(id!)
       .filter((p) => !p.deleted)
       .toArray()
-    const links = await db.relationships
-      .filter((r) => !r.deleted && (r.person_id === id || r.relative_id === id))
-      .toArray()
-    const relatives = await Promise.all(
-      links.map(async (link) => {
-        const forward = link.relative_id === id
-        const relative = await db.people.get(forward ? link.person_id : link.relative_id)
-        return relative && !relative.deleted
-          ? { link, relative, type: forward ? link.type : reverseType(link.type) }
-          : undefined
-      }),
-    )
-    return { person: person && !person.deleted ? person : undefined, photo: photos[0], relatives }
+    return { person: person && !person.deleted ? person : undefined, photo: photos[0] }
   }, [id])
   const { data, error: readError } = useLiveData(query)
   const remove = async () => {
@@ -148,27 +136,7 @@ export function PersonPage() {
           </Button>
         </div>
       ))}
-      {data.relatives.some(Boolean) && (
-        <section className="mt-5">
-          <h2 className="font-semibold">Relationships</h2>
-          <ul>
-            {data.relatives.map(
-              (item) =>
-                item && (
-                  <li key={item.link.id}>
-                    <Link
-                      className="flex min-h-12 items-center text-accent"
-                      to={`/people/${item.relative.id}`}
-                    >
-                      {relationshipLabel(item.type, item.relative.gender)}:{' '}
-                      {item.relative.full_name}
-                    </Link>
-                  </li>
-                ),
-            )}
-          </ul>
-        </section>
-      )}
+      <ProfileConnections key={person.id} person={person} />
       {error && (
         <p role="alert" className="mt-4 text-danger">
           {error}
@@ -180,9 +148,11 @@ export function PersonPage() {
       >
         Edit person
       </Link>
-      <Button variant="danger" className="mt-3 w-full" onClick={() => setConfirm(true)}>
-        Delete person
-      </Button>
+      {!person.is_me && (
+        <Button variant="danger" className="mt-3 w-full" onClick={() => setConfirm(true)}>
+          Delete person
+        </Button>
+      )}
       <Dialog
         open={confirm}
         onClose={() => {

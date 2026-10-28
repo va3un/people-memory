@@ -25,6 +25,8 @@ with sync_playwright() as p:
     page.on('console', lambda m: csp.append(m.text) if 'Content Security Policy' in m.text else None)
     c.on('request', lambda r: external.append(r.url) if not r.url.startswith(('http://127.0.0.1', 'blob:', 'data:')) else None)
     page.goto(base + '#/add')
+    page.get_by_role('textbox', name='Your name (fictional for testing)', exact=True).fill('Fictional Browser Me')
+    page.get_by_role('button', name='Continue', exact=True).click()
     expect(page.get_by_role('heading', name='Add', exact=True)).to_be_visible()
 
     def name(text):
@@ -41,7 +43,7 @@ with sync_playwright() as p:
     page.locator('input[type=file]').set_input_files({'name': 'broken.jpg', 'mimeType': 'image/jpeg', 'buffer': b'broken'})
     save()
     expect(page.get_by_role('alert')).to_contain_text('Choose another image')
-    assert rows('people') == [], rows('people')
+    assert len(rows('people')) == 1 and rows('people')[0]['is_me'], rows('people')
     expect(page.get_by_role('textbox', name='Full name', exact=True)).to_have_value('Fictional Mother')
     png = page.evaluate("()=>{let c=document.createElement('canvas');c.width=1200;c.height=800;let x=c.getContext('2d');x.fillStyle='#4f46e5';x.fillRect(0,0,1200,800);return c.toDataURL('image/png').split(',')[1]}")
     page.locator('input[type=file]').set_input_files({'name': 'fictional.png', 'mimeType': 'image/png', 'buffer': base64.b64decode(png)})

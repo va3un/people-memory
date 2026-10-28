@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useModalFocus } from '../../lib/useModalFocus'
 
 export type SheetProps = {
@@ -14,7 +15,7 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <button
         type="button"
@@ -34,6 +35,7 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
         <h2 className="text-lg font-semibold">{title}</h2>
         <div className="mt-3">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
