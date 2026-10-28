@@ -1,5 +1,6 @@
 // First launch collects a fictional Me profile and optional contexts without resetting any data.
 import { useRef, useState } from 'react'
+import { ImportPanel } from '../components/backup/ImportPanel'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { ContextPicker } from '../components/contexts/ContextPicker'
@@ -42,7 +43,7 @@ export function MeSetupPage() {
       </p>
       <p className="mt-3 text-muted">
         Use a fictional name and fictional contexts for testing. Data is unencrypted on this device;
-        backup and sync are not available yet.
+        JSON backups are available in Settings after setup; sync is not configured.
       </p>
       <form
         className="mt-5 space-y-4"
@@ -97,6 +98,14 @@ export function MeSetupPage() {
           </Button>
         </fieldset>
       </form>
+      <details className="mt-6 rounded-2xl border p-4">
+        <summary className="min-h-12 cursor-pointer font-semibold">Restore a JSON backup</summary>
+        <p>
+          Restore your directory before creating a new Me profile. Use a fictional backup for
+          testing.
+        </p>
+        <ImportPanel />
+      </details>
       {pickerOpen && (
         <ContextPicker
           onChoose={(choice) => setChoices((rows) => [...rows, choice])}

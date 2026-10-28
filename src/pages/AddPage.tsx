@@ -117,8 +117,8 @@ export function AddPage({
         {original ? 'Update this profile.' : 'Quick add: save someone new.'}
       </p>
       <p className="mt-2 text-base text-muted">
-        Stored unencrypted on this device. Backup is not available yet. Use fictional test data
-        only.
+        Stored unencrypted on this device. Keep a verified JSON backup from Settings. Use
+        fictional test data only.
       </p>
       {savedId && !original && (
         <a
