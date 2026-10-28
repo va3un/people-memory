@@ -47,6 +47,12 @@ export async function loadSampleData(): Promise<RecordCounts> {
     'rw',
     [db.people, db.contexts, db.memberships, db.relationships],
     async () => {
+      const me = await db.people.filter(p => p.is_me && !p.deleted).first()
+      const skipped = new Set(sample.people.filter(p => p.is_me && me && p.id !== me.id).map(p => p.id))
+      // Loading fixtures must never create a second Me or links to an omitted fixture.
+      sample.people = sample.people.filter(p => !skipped.has(p.id))
+      sample.memberships = sample.memberships.filter(m => !skipped.has(m.person_id))
+      sample.relationships = sample.relationships.filter(r => !skipped.has(r.person_id) && !skipped.has(r.relative_id))
       await putOnlyMissing(db.people, sample.people, knownIds)
       await putOnlyMissing(db.contexts, sample.contexts, knownIds)
       await putOnlyMissing(db.memberships, sample.memberships, knownIds)
