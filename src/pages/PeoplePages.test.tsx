@@ -6,6 +6,7 @@ import { afterEach, beforeEach, expect, it } from 'vitest'
 import { db } from '../db/database'
 import { savePerson } from '../db/people'
 import { personDefaults } from '../db/typed'
+import { DirectoryProvider } from '../search/DirectoryProvider'
 import { SearchPage } from './SearchPage'
 import { PersonPage } from './PersonPage'
 import { EditPersonPage } from './EditPersonPage'
@@ -16,13 +17,15 @@ async function render(path: string) {
   const root = createRoot(container)
   await act(async () => {
     root.render(
-      <MemoryRouter initialEntries={[path]}>
-        <Routes>
-          <Route path="/" element={<SearchPage />} />
-          <Route path="/people/:id" element={<PersonPage />} />
-          <Route path="/people/:id/edit" element={<EditPersonPage />} />
-        </Routes>
-      </MemoryRouter>,
+      <DirectoryProvider>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route path="/" element={<SearchPage />} />
+            <Route path="/people/:id" element={<PersonPage />} />
+            <Route path="/people/:id/edit" element={<EditPersonPage />} />
+          </Routes>
+        </MemoryRouter>
+      </DirectoryProvider>,
     )
   })
   for (let attempt = 0; attempt < 100 && container.querySelector('[role="status"]'); attempt++) {

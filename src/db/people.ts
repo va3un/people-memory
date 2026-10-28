@@ -1,5 +1,6 @@
 // Atomic Phase 3 writes. Image decoding happens before entering IndexedDB transactions.
 import { db } from './database'
+import { samePersonRevision } from './personRevision'
 import { writeMembership, type ContextChoice } from './contexts'
 import { createRecord, nowIso, softDeleteRecord, updateRecord } from './records'
 import { personDefaults, type NewPerson } from './typed'
@@ -46,9 +47,9 @@ export async function savePerson(input: PersonSave): Promise<Person> {
     [db.people, db.photos, db.relationships, db.contexts, db.memberships],
     async () => {
       const original = input.original
+      const current = original ? await db.people.get(original.id) : undefined
       if (original) {
-        const current = await db.people.get(original.id)
-        if (!current || current.deleted || JSON.stringify(current) !== JSON.stringify(original)) {
+        if (!current || current.deleted || !samePersonRevision(current, original)) {
           throw new Error('This person changed elsewhere. Reopen the profile before editing again.')
         }
       }
@@ -69,7 +70,11 @@ export async function savePerson(input: PersonSave): Promise<Person> {
       if (!original && input.values.id && (await db.people.get(input.values.id))) {
         throw new Error('This record already exists. Reopen the profile before saving again.')
       }
-      const values = { ...input.values, full_name: name }
+      const values = {
+        ...input.values,
+        full_name: name,
+        ...(original ? { last_viewed_at: current?.last_viewed_at } : {}),
+      }
       const person = original
         ? await updateRecord(db.people, original.id, values)
         : await createRecord(db.people, { ...personDefaults(name), ...values })
@@ -105,12 +110,12 @@ export async function deletePersonWithUndo(original: Person): Promise<DeleteRece
   if (original.is_me) throw new Error('Keep your Me profile. You can edit it in Settings.')
   return db.transaction('rw', db.people, async () => {
     const current = await db.people.get(original.id)
-    if (!current || current.deleted || JSON.stringify(current) !== JSON.stringify(original)) {
+    if (!current || current.deleted || !samePersonRevision(current, original)) {
       throw new Error('This person changed elsewhere. Reopen the profile before deleting.')
     }
     const deleted = (await softDeleteRecord(db.people, original.id))!
     // Keep photos and links intact. Views exclude deleted endpoints; Undo restores the whole profile.
-    return { person: original, deleted, expiresAt: Date.now() + 10_000 }
+    return { person: current, deleted, expiresAt: Date.now() + 10_000 }
   })
 }
 
@@ -118,11 +123,15 @@ export async function undoPersonDelete(receipt: DeleteReceipt): Promise<void> {
   await db.transaction('rw', db.people, async () => {
     if (Date.now() >= receipt.expiresAt) throw new Error('The 10-second Undo period has ended.')
     const current = await db.people.get(receipt.person.id)
-    if (JSON.stringify(current) !== JSON.stringify(receipt.deleted)) {
+    if (!samePersonRevision(current, receipt.deleted)) {
       throw new Error(
         'This person changed after deletion. Undo was stopped to protect those changes.',
       )
     }
-    await db.people.put({ ...receipt.person, updated_at: nowIso() })
+    await db.people.put({
+      ...receipt.person,
+      last_viewed_at: current?.last_viewed_at,
+      updated_at: nowIso(),
+    })
   })
 }

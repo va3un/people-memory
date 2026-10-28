@@ -165,6 +165,7 @@ Phase 4: Contexts, relationships and the Me profile. Implementation and local au
 - One low-severity npm advisory remains in build tooling: serialize-javascript 7.1.2 through Workbox. No dependency versions were changed in this phase.
 
 # Decisions made
+- Added minisearch@7.2.0 for the roadmap-required local in-memory Phase 5 prefix/typo search index; existing package versions are unchanged.
 - Phase 4 uses the existing schema and tables without migrations, wiping records or converting existing ordinary people into Me.
 - Context counts include Me when Me is a member and count each active person once; category counts cover assigned categories on ordinary people.
 - Follow roadmap v3.

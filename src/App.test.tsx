@@ -54,7 +54,7 @@ describe('app shell', () => {
   it('shows the Phase 3 people list', async () => {
     const { container, unmount } = await renderApp()
     expect(container.textContent).toContain('Search')
-    expect(container.textContent).toContain('Your people, newest first')
+    expect(container.querySelector('input[name="search"]')).not.toBeNull()
     unmount()
   })
 
