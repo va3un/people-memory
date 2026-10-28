@@ -1,7 +1,8 @@
 // Read and edit saved profiles. Existing quick-add links are shown in both directions.
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { db } from '../db/database'
+import { recordPersonView } from '../db/lastViewed'
 import { useLiveData } from '../lib/useLiveData'
 import { PersonAvatar } from '../components/PersonAvatar'
 import { Button } from '../components/ui/Button'
@@ -13,6 +14,12 @@ import { ProfileConnections } from '../components/ProfileConnections'
 export function PersonPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  useEffect(() => {
+    if (id)
+      void recordPersonView(id).catch(() => {
+        /* Viewing remains available if local history cannot be saved. */
+      })
+  }, [id])
   const [confirm, setConfirm] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')

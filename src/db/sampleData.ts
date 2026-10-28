@@ -270,7 +270,7 @@ export function isSameSampleContent(
 }
 
 // The fields that describe when a record was saved, not what it says.
-const IGNORED_KEYS = new Set(['id', 'created_at', 'updated_at', 'deleted'])
+const IGNORED_KEYS = new Set(['id', 'created_at', 'updated_at', 'deleted', 'last_viewed_at'])
 
 // Compares two field values, including arrays and objects.
 function sameValue(left: unknown, right: unknown): boolean {

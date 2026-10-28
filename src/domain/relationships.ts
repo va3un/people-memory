@@ -34,12 +34,22 @@ export const RELATIONSHIPS: Record<RelationshipType, RelationshipInfo> = {
   },
   grandparent: {
     reverse: 'grandchild',
-    labels: { male: 'Grandfather', female: 'Grandmother', other: 'Grandparent', unknown: 'Grandparent' },
+    labels: {
+      male: 'Grandfather',
+      female: 'Grandmother',
+      other: 'Grandparent',
+      unknown: 'Grandparent',
+    },
     generic: 'Grandparent',
   },
   grandchild: {
     reverse: 'grandparent',
-    labels: { male: 'Grandson', female: 'Granddaughter', other: 'Grandchild', unknown: 'Grandchild' },
+    labels: {
+      male: 'Grandson',
+      female: 'Granddaughter',
+      other: 'Grandchild',
+      unknown: 'Grandchild',
+    },
     generic: 'Grandchild',
   },
   uncle_aunt: {
@@ -49,7 +59,12 @@ export const RELATIONSHIPS: Record<RelationshipType, RelationshipInfo> = {
   },
   nephew_niece: {
     reverse: 'uncle_aunt',
-    labels: { male: 'Nephew', female: 'Niece', other: 'Nephew or niece', unknown: 'Nephew or niece' },
+    labels: {
+      male: 'Nephew',
+      female: 'Niece',
+      other: 'Nephew or niece',
+      unknown: 'Nephew or niece',
+    },
     generic: 'Nephew or niece',
   },
   cousin: {
@@ -131,4 +146,13 @@ export function relationshipSentence(
 // True when both people are linked by the same type in either direction.
 export function isSymmetric(type: RelationshipType): boolean {
   return RELATIONSHIPS[type].reverse === type
+}
+
+// Search describes the indexed person's relationship to the named relative.
+export function relationshipDescription(
+  type: RelationshipType,
+  gender: Gender,
+  otherName: string,
+): string {
+  return `${relationshipLabel(type, gender)} ${type === 'other' ? 'to' : 'of'} ${otherName}`
 }

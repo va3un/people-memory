@@ -1,4 +1,35 @@
 # Latest report
+Phase 5 implementation, 28 October 2026, on `feature/phase-5`. Automated and browser checks pass; independent PR review is pending. Routine phone/UI acceptance remains deferred until final testing, not recorded as passed. Phase 6 has not started.
+
+What was done
+- Updated only the testing-workflow paragraphs in roadmap sections 1.2 and 14, as approved: automated tests, typecheck, build and independent PR review are required per phase; routine phone/UI checks may be deferred and tracked; critical backup/restore, Dropbox sync and real-data migration checks must pass before those features are accepted. All other roadmap requirements remain unchanged.
+- Added MiniSearch with prefix and small-typo tolerance, case/Latin-accent/spacing normalization, Devanagari support, and AND matching across multiple clues. Search covers names, nicknames, maiden names, digit-normalized phones, city, category, how-I-know, notes, active context names/roles and directly related names with directional labels. No relatives-of-relatives are indexed, and Me stays hidden from results.
+- Added explicit result ranking and a saved-fact explanation on each photo/initials card, including Husband of Meera Joshi, Colleague at Lionbridge and the society/group examples. Maiden-name explanations require an existing maiden_name; no names or relationships are inferred.
+- The index is created in memory at app startup and refreshed from committed changes, including other tabs. It is never stored in IndexedDB or exported. Visible cards load their own local thumbnails instead of loading every photo into the text index. Search results and the newest-first people list offer Show more pagination.
+- Empty search shows recently viewed people, recently added people and popular-context shortcuts. Profile views update only the existing local-only last_viewed_at field. Contact IDs, content and edit timestamps are preserved. Editing, deletion, Undo and fixture protection distinguish view history from contact edits, retaining stale-write/conflict protection for actual edits.
+- Added minisearch@7.2.0 for the roadmap-required in-memory search engine, with an exact version and lockfile. All previously pinned package versions and platform metadata are unchanged. No database schema/version change or migration was introduced. Phase 3/4 people, photos, contexts, memberships, relative links, Me setup and Undo remain intact.
+- Validation: typecheck, all 231 tests across 22 files, the production build with the GitHub Pages base path, and whitespace checks passed. Tests cover all nine roadmap Search scenarios, ranking, Unicode, prefixes/typos, phone formatting, one-hop boundaries, deleted endpoints, reactive updates, safe local history, pagination, escaped text and a 2,000-person fictional dataset.
+- All three production browser scripts passed: Phase 3 regression, Phase 4 regression and Phase 5 search. Phase 5 checks include roadmap clues, live cross-tab name/alias/membership/relative updates, delete/Undo refresh, recents, local photo thumbnails, offline reopen/add/search, and a 2,000-person lookup and pagination. The successful search rehearsal measured a 138 ms lookup on the synthetic 2,000-person dataset. This is an automated Chromium measurement, not physical-phone acceptance. No uncaught page errors, CSP violations or third-party requests occurred in the tested flows.
+- No deployment was performed. All fixtures are fictional. Backup/export, sync and real-data migration remain unimplemented later-phase work with the newly documented critical acceptance gates.
+
+Please test (routine phone/UI checks deferred until final testing; not claimed passed)
+
+1. With fictional sample records, try Meera, meera husband, Lionbridge, Sagar Heights, 7B and मीरा. Confirm the right people and clear explanation lines on the phone.
+2. Open a result, return to Search, clear the query and check Recently viewed and the context shortcuts. Edit a fictional person or add a relative/context and confirm search reflects the changes.
+3. After an online load, reopen the installed app in airplane mode. Search, add and edit fictional people, then search again. Check readability and layout with enlarged system text and light/dark mode.
+
+The earlier under-20-second quick-add target and Windows Call/WhatsApp observations remain outstanding below. Their deferral does not mean those checks passed. Critical backup/restore, Dropbox sync and real-data migration checks are not covered by this routine deferral.
+
+Decisions I made
+- Kept search read-only apart from the explicitly local view-history field. Local viewing cannot refresh updated_at, overwrite a newer view during an edit, invalidate an otherwise safe edit/delete, or bypass protection against a later contact change.
+- Ranking prioritizes own-name matches, then nickname/maiden/phone matches, directly related people, contexts and other details/notes. Matching is keyword-based with all meaningful query words required; no natural-language parser or later-phase capture feature was added.
+- Recently added retains access to every ordinary person through Show more; the initial display is bounded for responsiveness. Context shortcuts count distinct active ordinary members and open the existing context detail page. Index refreshes do not require connectivity or an AI/provider account.
+- Used the existing normalization and relationship wording modules. All other roadmap requirements, storage/privacy limitations, existing records and deferred acceptance observations remain in force.
+
+Need from you
+- Independent PR review is required before Phase 5 acceptance. Routine phone/UI observations remain queued for final testing under the approved hybrid workflow. Phase 6 requires a separate instruction and has not started.
+
+# Previous report: Phase 4 implementation
 Phase 4 implementation, 28 October 2026. All Phase 4 tasks are implemented on `feature/phase-4` and locally verified. Independent review and physical-phone acceptance remain pending. Phase 5 has not started.
 
 What was done
@@ -144,7 +175,7 @@ Need from you
 - None. The Airtable rehearsal uses invented column names. If you remember the real column names from the old Airtable base, tell me and I will match them before Phase 11.
 
 # Current phase
-Phase 4: Contexts, relationships and the Me profile. Implementation and local automated/browser checks complete on 28 October 2026; independent review and Phase 4 phone acceptance pending. Phase 3 remains accepted for its verified core functionality, with its three outstanding observations retained below. Phase 5 has not started.
+Phase 5: Search. Implementation and local automated/browser checks complete on 28 October 2026; independent PR review pending. Routine phone/UI acceptance is deferred until final testing under the approved hybrid workflow. Phase 3/4 functionality is preserved. Phase 6 has not started.
 
 # Done
 - GitHub account verified.
@@ -156,15 +187,19 @@ Phase 4: Contexts, relationships and the Me profile. Implementation and local au
 - Phase 2: Dexie data layer, domain rules, sample data, Settings developer tools, storage status, Airtable mapping rehearsal.
 - Phase 3: people list, profile, editing, atomic quick add with photos and relationship types, and soft delete with 10-second Undo. All 172 tests, typecheck and production build pass locally. Code review and desktop and Android manual tests of core functionality passed, confirmed by Varun on 27 October 2026. Phase 3 is accepted for its verified core functionality, with the three acceptance observations above still outstanding; the earlier commit 8ad341b implemented only part of this phase.
 
-- Phase 4: context picker/creator in Quick add and profiles; live Browse/context/category details; atomic Add relative sheet with reverse labels; first-run Me setup and Settings access; 197 automated tests and both browser suites pass locally. Awaiting independent review and phone acceptance.
+- Phase 4: context picker/creator in Quick add and profiles; live Browse/context/category details; atomic Add relative sheet with reverse labels; first-run Me setup and Settings access; 197 automated tests and both browser suites passed locally; merged in [PR #3](https://github.com/va3un/people-memory/pull/3). Routine phone/UI checks are retained as deferred final-testing observations, not claimed as passed.
+
+- Phase 5: reactive in-memory MiniSearch index, prefix/typo/AND matching, ranked match explanations, local recents and context shortcuts; 231 tests across 22 files and all three browser scripts pass locally. Awaiting independent PR review; routine phone/UI checks deferred.
 
 # Known problems
-- Phase 4 has not yet received independent review or physical Android acceptance. Desktop Chromium automation and its mobile viewport are not a physical-phone test.
+- Phase 5 independent PR review is pending. Routine Phase 4/5 phone/UI checks are deferred until final testing; desktop Chromium automation is not a physical-phone test.
 - Outstanding acceptance observations, not explicitly verified: enlarged system text, under-20-second quick add, and Windows Call/WhatsApp handling. These are not confirmed defects and do not revoke acceptance of the verified Phase 3 core functionality.
 - Storage is unencrypted and local to this browser. Backup/export and Dropbox sync remain later phases. Use fictional test data only; clearing browser data or losing the device loses records.
-- One low-severity npm advisory remains in build tooling: serialize-javascript 7.1.2 through Workbox. No dependency versions were changed in this phase.
+- The previously recorded low-severity serialize-javascript 7.1.2 build-tool advisory remains. Phase 5 adds only minisearch@7.2.0 and leaves all existing dependency versions unchanged.
 
 # Decisions made
+- Approved hybrid testing workflow: automated checks and independent PR review for every phase; routine phone/UI checks may wait for final testing. Backup/restore, Dropbox sync and real-data migration verification remain mandatory before accepting those features.
+- Added minisearch@7.2.0 for the roadmap-required local in-memory Phase 5 prefix/typo search index; existing package versions are unchanged.
 - Phase 4 uses the existing schema and tables without migrations, wiping records or converting existing ordinary people into Me.
 - Context counts include Me when Me is a member and count each active person once; category counts cover assigned categories on ordinary people.
 - Follow roadmap v3.

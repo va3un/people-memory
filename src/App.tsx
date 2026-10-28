@@ -1,3 +1,4 @@
+import { DirectoryProvider } from './search/DirectoryProvider'
 import { Route, Routes } from 'react-router-dom'
 import { BottomNav } from './components/layout/BottomNav'
 import { Toaster } from './components/ui/Toast'
@@ -21,34 +22,36 @@ export function App() {
   const { data: me, error } = useLiveData(readMe)
 
   return (
-    <div className="min-h-dvh bg-background text-text">
-      {error ? (
-        <main className="page py-6">
-          <p role="alert">
-            Could not load your Me profile. Existing data has been kept. Try reopening the app.
-          </p>
-        </main>
-      ) : me === undefined ? (
-        <main className="page py-6">
-          <p role="status">Loading your profile…</p>
-        </main>
-      ) : me === null ? (
-        <MeSetupPage />
-      ) : (
-        <Routes>
-          <Route path="/" element={<SearchPage />} />
-          <Route path="/people/:id" element={<PersonPage />} />
-          <Route path="/people/:id/edit" element={<EditPersonPage />} />
-          <Route path="/add" element={<AddRoute />} />
-          <Route path="/contexts/:id" element={<ContextPage />} />
-          <Route path="/categories/:category" element={<CategoryPage />} />
-          <Route path="/browse" element={<BrowsePage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/design" element={<DesignPage />} />
-        </Routes>
-      )}
-      {me && <BottomNav />}
-      <Toaster />
-    </div>
+    <DirectoryProvider>
+      <div className="min-h-dvh bg-background text-text">
+        {error ? (
+          <main className="page py-6">
+            <p role="alert">
+              Could not load your Me profile. Existing data has been kept. Try reopening the app.
+            </p>
+          </main>
+        ) : me === undefined ? (
+          <main className="page py-6">
+            <p role="status">Loading your profile…</p>
+          </main>
+        ) : me === null ? (
+          <MeSetupPage />
+        ) : (
+          <Routes>
+            <Route path="/" element={<SearchPage />} />
+            <Route path="/people/:id" element={<PersonPage />} />
+            <Route path="/people/:id/edit" element={<EditPersonPage />} />
+            <Route path="/add" element={<AddRoute />} />
+            <Route path="/contexts/:id" element={<ContextPage />} />
+            <Route path="/categories/:category" element={<CategoryPage />} />
+            <Route path="/browse" element={<BrowsePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/design" element={<DesignPage />} />
+          </Routes>
+        )}
+        {me && <BottomNav />}
+        <Toaster />
+      </div>
+    </DirectoryProvider>
   )
 }

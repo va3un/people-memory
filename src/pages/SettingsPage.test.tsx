@@ -68,10 +68,7 @@ async function waitFor(check: () => boolean | Promise<boolean>, tries = 40) {
 async function typeConfirmationWord(container: HTMLElement) {
   const input = container.querySelector('input[aria-label="Confirmation word"]') as HTMLInputElement
   await act(async () => {
-    const setter = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      'value',
-    )?.set
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
     setter?.call(input, 'DELETE')
     input.dispatchEvent(new Event('input', { bubbles: true }))
   })
@@ -114,6 +111,7 @@ describe('settings developer tools', () => {
       button?.click()
     })
 
+    await waitFor(() => buttonByText(container, 'Load sample data')?.disabled === false)
     const people = await db.people.toArray()
     expect(people.length).toBe(8)
     unmount()
@@ -153,6 +151,7 @@ describe('settings developer tools', () => {
       enabledButton.click()
     })
 
+    await waitFor(() => buttonByText(container, 'Load sample data')?.disabled === false)
     const people = await db.people.toArray()
     expect(people.length).toBe(0)
     unmount()
@@ -183,6 +182,7 @@ describe('settings developer tools', () => {
       ;(dialogButton(container, 'Delete sample data') as HTMLButtonElement).click()
     })
 
+    await waitFor(() => buttonByText(container, 'Delete sample data')?.disabled === false)
     const saved = await db.people.get(real.id)
     expect(saved?.deleted).toBe(false)
     expect(saved?.full_name).toBe('Real Person')

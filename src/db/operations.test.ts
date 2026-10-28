@@ -1,6 +1,7 @@
 // Tests for the typed helpers and the developer tools.
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { db } from './database'
+import { recordPersonView } from './lastViewed'
 import { countRecords, loadSampleData, softDeleteSampleData } from './operations'
 import {
   createContext,
@@ -342,4 +343,12 @@ it('sample deletion preserves edited fixtures, unknown prefixed IDs and newly li
   expect((await db.people.get(SAMPLE_IDS.rahul))?.deleted).toBe(false)
   expect((await db.people.get(custom.id))?.deleted).toBe(false)
   expect((await db.people.get(SAMPLE_IDS.meera))?.deleted).toBe(false)
+})
+
+it('does not treat local view metadata as an edit to an otherwise unchanged fixture', async () => {
+  await loadSampleData()
+  await recordPersonView(SAMPLE_IDS.anil)
+  expect((await db.people.get(SAMPLE_IDS.anil))?.last_viewed_at).toBeDefined()
+  await softDeleteSampleData()
+  expect((await db.people.get(SAMPLE_IDS.anil))?.deleted).toBe(true)
 })
