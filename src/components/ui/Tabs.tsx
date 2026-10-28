@@ -21,11 +21,7 @@ export function Tabs({ items, initialTabId, className = '' }: TabsProps) {
 
   return (
     <div className={`flex flex-col gap-4 ${className}`}>
-      <div
-        role="tablist"
-        aria-label="Tabs"
-        className="flex gap-1 rounded-2xl bg-accent-soft p-1"
-      >
+      <div role="tablist" aria-label="Tabs" className="flex gap-1 rounded-2xl bg-accent-soft p-1">
         {items.map((item) => {
           const isActive = item.id === active?.id
           return (
@@ -34,6 +30,24 @@ export function Tabs({ items, initialTabId, className = '' }: TabsProps) {
               role="tab"
               type="button"
               aria-selected={isActive}
+              tabIndex={isActive ? 0 : -1}
+              onKeyDown={(event) => {
+                const index = items.findIndex((tab) => tab.id === item.id)
+                const next =
+                  event.key === 'ArrowRight'
+                    ? (index + 1) % items.length
+                    : event.key === 'ArrowLeft'
+                      ? (index + items.length - 1) % items.length
+                      : event.key === 'Home'
+                        ? 0
+                        : event.key === 'End'
+                          ? items.length - 1
+                          : undefined
+                if (next === undefined) return
+                event.preventDefault()
+                setActiveId(items[next].id)
+                document.getElementById(`${groupId}-tab-${items[next].id}`)?.focus()
+              }}
               aria-controls={`${groupId}-${item.id}`}
               id={`${groupId}-tab-${item.id}`}
               onClick={() => setActiveId(item.id)}
@@ -47,7 +61,11 @@ export function Tabs({ items, initialTabId, className = '' }: TabsProps) {
         })}
       </div>
       {active ? (
-        <div role="tabpanel" id={`${groupId}-${active.id}`} aria-labelledby={`${groupId}-tab-${active.id}`}>
+        <div
+          role="tabpanel"
+          id={`${groupId}-${active.id}`}
+          aria-labelledby={`${groupId}-tab-${active.id}`}
+        >
           {active.content}
         </div>
       ) : null}

@@ -1,3 +1,4 @@
+import { AboutYou } from '../components/settings/AboutYou'
 import { APP_VERSION } from '../lib/appVersion'
 import { Card } from '../components/ui/Card'
 import { Chip } from '../components/ui/Chip'
@@ -15,6 +16,7 @@ export function SettingsPage() {
         <StorageCard />
       </section>
 
+      <AboutYou />
       <DeveloperTools />
 
       <section className="mt-6">
@@ -36,7 +38,6 @@ export function SettingsPage() {
           <p className="p-4 text-sm text-muted">Sync with Dropbox (Phase 9)</p>
           <p className="p-4 text-sm text-muted">Backup and export (Phase 6)</p>
           <p className="p-4 text-sm text-muted">Smart capture settings (Phase 8)</p>
-          <p className="p-4 text-sm text-muted">Your own profile (Phase 4)</p>
         </Card>
       </section>
     </main>

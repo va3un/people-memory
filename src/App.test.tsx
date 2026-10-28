@@ -1,8 +1,16 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { createRoot } from 'react-dom/client'
 import { act } from 'react'
 import { HashRouter } from 'react-router-dom'
 import { App } from './App'
+import { db } from './db/database'
+import { createMe } from './db/me'
+
+beforeEach(async () => {
+  await db.people.clear()
+  await createMe('Fictional App Test Me', [])
+  window.location.hash = '#/'
+})
 
 // Renders the whole app into a detached element so the shell can be checked.
 async function renderApp() {
@@ -18,6 +26,11 @@ async function renderApp() {
     )
   })
 
+  for (let i = 0; i < 100 && !container.querySelector('nav'); i++) {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    })
+  }
   return {
     container,
     unmount: () => {

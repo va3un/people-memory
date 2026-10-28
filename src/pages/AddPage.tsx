@@ -1,6 +1,9 @@
 // Quick add and editing keep drafts intact when validation, image decoding or storage fails.
 import { useEffect, useRef, useState } from 'react'
-import { Avatar } from '../components/ui/Avatar'
+import { useSearchParams } from 'react-router-dom'
+import { ContextField } from '../components/contexts/ContextField'
+import type { ContextChoice } from '../db/contexts'
+import { PhotoField } from '../components/PhotoField'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
@@ -16,17 +19,19 @@ export function AddPage({
   original,
   existingPhoto,
   onSaved,
+  initialContext,
 }: {
+  initialContext?: ContextChoice
   original?: Person
   existingPhoto?: Photo
   onSaved?: (person: Person) => void
 }) {
+  const [contextChoice, setContextChoice] = useState<ContextChoice | undefined>(initialContext)
   const [people, setPeople] = useState<Person[]>([])
   const [values, setValues] = useState<NewPerson>(() => original ?? personDefaults(''))
   const [relatedTo, setRelatedTo] = useState('')
   const [relationshipType, setRelationshipType] = useState<RelationshipType>('other')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [photoPreview, setPhotoPreview] = useState<string>()
   const [removedPhoto, setRemovedPhoto] = useState(false)
   const [saving, setSaving] = useState(false)
   const [moreOpen, setMoreOpen] = useState(!!original)
@@ -42,16 +47,6 @@ export function AddPage({
       .then(setPeople)
       .catch(() => setError('Could not load people. Try reopening the app.'))
   }, [savedId])
-  useEffect(() => {
-    const blob = photoFile ?? (!removedPhoto ? existingPhoto?.blob : undefined)
-    if (!blob) {
-      setPhotoPreview(undefined)
-      return
-    }
-    const url = URL.createObjectURL(blob)
-    setPhotoPreview(url)
-    return () => URL.revokeObjectURL(url)
-  }, [photoFile, removedPhoto, existingPhoto])
   useEffect(() => {
     if (error) errorRef.current?.focus()
   }, [error])
@@ -69,6 +64,7 @@ export function AddPage({
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
   const resetForm = () => {
+    setContextChoice(initialContext)
     setValues(personDefaults(''))
     setRelatedTo('')
     setRelationshipType('other')
@@ -95,6 +91,7 @@ export function AddPage({
         removePhoto: removedPhoto,
         relativeId: relatedTo || undefined,
         relationshipType,
+        contextChoice,
       })
       setDirty(false)
       setSavedId(person.id)
@@ -146,41 +143,21 @@ export function AddPage({
             </p>
           )}
           <fieldset disabled={saving} className="mt-3 flex min-w-0 flex-col gap-3">
-            <label htmlFor="photo">Photo (camera or gallery)</label>
-            <input
-              id="photo"
-              type="file"
-              accept="image/*"
-              aria-label="Photo"
-              className="min-h-12 w-full"
-              ref={fileInputRef}
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                if (!file.type.startsWith('image/')) {
-                  setError('Please pick an image file.')
-                  e.target.value = ''
-                  return
-                }
-                if (file.size > 20 * 1024 * 1024) {
-                  setError('Choose a photo smaller than 20 MB.')
-                  e.target.value = ''
-                  return
-                }
+            <PhotoField
+              name={values.full_name}
+              file={photoFile}
+              existingPhoto={existingPhoto}
+              removed={removedPhoto}
+              inputRef={fileInputRef}
+              onRemove={removePhoto}
+              onError={setError}
+              onPick={(file) => {
                 setPhotoFile(file)
                 setRemovedPhoto(false)
                 setDirty(true)
                 setError('')
               }}
             />
-            {photoPreview && (
-              <div className="flex items-center gap-3">
-                <Avatar name={values.full_name || 'Person'} src={photoPreview} />
-                <Button variant="danger" onClick={removePhoto}>
-                  Remove photo
-                </Button>
-              </div>
-            )}
             <Input
               name="full_name"
               label="Full name"
@@ -193,6 +170,13 @@ export function AddPage({
               label="How do I know them?"
               value={values.how_i_know ?? ''}
               onChange={(e) => change({ how_i_know: e.target.value })}
+            />
+            <ContextField
+              choice={contextChoice}
+              onChange={(choice) => {
+                setContextChoice(choice)
+                setDirty(true)
+              }}
             />
             {!original && (
               <RelatedPersonFields
@@ -248,4 +232,11 @@ export function AddPage({
       </form>
     </main>
   )
+}
+
+// Hash-router entry point for adding a person from a context detail page.
+export function AddRoute() {
+  const [params] = useSearchParams()
+  const contextId = params.get('context')
+  return <AddPage key={contextId ?? 'new'} initialContext={contextId ? { contextId } : undefined} />
 }
