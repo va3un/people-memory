@@ -1,4 +1,31 @@
 # Latest report
+Phase 6 implementation, 28 October 2026, on `feature/phase-6`. Implementation and local automated/browser checks are complete. Independent review and critical Android backup/restore acceptance remain pending. Phase 7 has not started.
+
+What was done
+- Added full versioned JSON backups with every portable record, photo bytes, contexts, memberships, relationships, capture history and tombstones. API keys, tokens and all device settings are excluded. Existing Phase 3–5 records, schema, IDs and functionality are preserved.
+- Added separate people/context/membership/relationship CSVs in one ZIP and vCard 3.0 for active people with phone numbers. CSV cells protect against formula injection; Unicode, quotes and line breaks are preserved. These convenience exports are not full restore formats.
+- Added read-only JSON validation and count/duplicate previews, default merge, guarded replacement, cancellation and retry. Merge retains existing ID versions and deletions; same-name different IDs require acknowledgement. Replacement requires a newly downloaded safety backup, exact-file read-back verification and typed REPLACE. Stale previews, invalid data and two-Me merges are refused. All six portable tables commit in one transaction; device settings are never imported or cleared.
+- Added first-launch restore before creating Me, a visible Backup now action and a quiet 30-day notice based only on a verified saved JSON snapshot. Fixed the draft guard so saving the mandatory safety backup preserves the preview.
+- Validation passed: typecheck, all 281 tests across 25 files, production build for the Pages base path, and whitespace checks. New tests cover full export → test-only wipe → restore → equality, all photo bytes, Unicode, capture history, tombstones, linked merge, settings protection, duplicate handling, malformed/future/oversized content, corrupt photos, stale previews, download failures, cancellation, quota rollback and retry.
+- All four production Chromium scripts passed. Phase 6 exercised actual JSON/CSV ZIP/vCard downloads and file selection, checksum and image decoding, exact data equality after replacement, and a downloaded-file restore from first launch while offline. A real IndexedDB write failure was injected after earlier replacement writes: the entire old dataset survived, then retry succeeded. Corrupt image data with a valid checksum was refused by the actual decoder. Earlier Phase 3–5 browser regressions also passed, including the 2,000-person search. No uncaught page errors, CSP violations or third-party requests occurred in the tested flows.
+- All fixtures and images are fictional/generated. Local data and exports remain unencrypted. Dropbox sync remains unavailable. No deployment, roadmap modification, database migration or Phase 7 work occurred. Free GitHub Actions checks are required on the review branch; their result will be recorded below after pushing.
+
+Please test (critical recovery check remains an acceptance gate, not a routine deferral)
+1. In a separate Android test browser/profile with fictional records only, open Settings → Backup now. Save the JSON, then Verify downloaded backup → choose that file. Keep it outside browser storage. Do not clear your normal app or any personal records.
+2. In another disposable Android browser/profile, open About you → Restore a JSON backup → choose the saved JSON → review counts → Import now. Confirm every fictional person, visible photo, context and relationship returned. This critical physical-phone restore is not claimed passed by desktop automation.
+3. In that disposable test directory, open Settings → Import JSON, choose malformed JSON and confirm refusal. Choose a valid backup → Replace: Import now must remain disabled until Download safety backup → save it → Verify safety backup → choose that exact file → type REPLACE. Cancel the preview if you do not intend replacement.
+4. For routine final testing, inspect backup controls with enlarged system text, light/dark mode and keyboard navigation. Android/Windows Contacts import of the fictional vCard is also unverified. Earlier under-20-second quick add and Windows Call/WhatsApp observations remain outstanding.
+
+Decisions I made
+- Added fflate@0.8.3 solely for the required offline CSV ZIP. No paid service, backend or existing dependency update was introduced.
+- Never guess whether different IDs represent one person, overwrite a conflicting local record on merge, remove tombstones or copy device secrets. Replacement restores the file dataset exactly and preserves device settings. Preview/backup capabilities expire on reload and cannot be reused after a successful import.
+- A clicked download does not prove saving. Re-selecting the exact fresh file verifies possession before replacement and resets the reminder. Only full JSON qualifies. Snapshots exclude later changes; a changed dataset requires a new preview and safety backup.
+- Bounded imports to 64 MiB JSON, 32 MiB decoded photos, 4 MiB per photo, 600 pixels per side, 50,000 rows plus structural limits. JPEG/PNG match the current app encoder. Unsupported/unknown content is refused rather than silently lost. Export applies matching validation so no oversized partial backup is presented as restorable. Details: [Backup and recovery](docs/BACKUP_FORMAT.md).
+
+Need from you
+- Independent PR review and the critical Android fictional backup/restore rehearsal above are required before accepting Phase 6. Routine UI observations may wait for final testing. No routine technical decision blocks review; Phase 7 requires a separate instruction.
+
+# Previous report: Phase 5 implementation
 Phase 5 implementation, 28 October 2026, on `feature/phase-5`. Automated and browser checks pass; independent PR review is pending. Routine phone/UI acceptance remains deferred until final testing, not recorded as passed. Phase 6 has not started.
 
 What was done
@@ -175,7 +202,7 @@ Need from you
 - None. The Airtable rehearsal uses invented column names. If you remember the real column names from the old Airtable base, tell me and I will match them before Phase 11.
 
 # Current phase
-Phase 5: Search. Implementation and local automated/browser checks complete on 28 October 2026; independent PR review pending. Routine phone/UI acceptance is deferred until final testing under the approved hybrid workflow. Phase 3/4 functionality is preserved. Phase 6 has not started.
+Phase 6: Backup, export and import. Implementation, typecheck, 281 tests across 25 files, production build and all four production Chromium scripts pass on 28 October 2026. Independent PR review and critical physical-Android backup/restore acceptance remain pending. Routine UI observations remain deferred under the hybrid workflow. Phase 3–5 records/functionality are preserved; Phase 7 has not started.
 
 # Done
 - GitHub account verified.
@@ -189,15 +216,19 @@ Phase 5: Search. Implementation and local automated/browser checks complete on 2
 
 - Phase 4: context picker/creator in Quick add and profiles; live Browse/context/category details; atomic Add relative sheet with reverse labels; first-run Me setup and Settings access; 197 automated tests and both browser suites passed locally; merged in [PR #3](https://github.com/va3un/people-memory/pull/3). Routine phone/UI checks are retained as deferred final-testing observations, not claimed as passed.
 
-- Phase 5: reactive in-memory MiniSearch index, prefix/typo/AND matching, ranked match explanations, local recents and context shortcuts; 231 tests across 22 files and all three browser scripts pass locally. Awaiting independent PR review; routine phone/UI checks deferred.
+- Phase 5: reactive in-memory MiniSearch index, prefix/typo/AND matching, ranked match explanations, local recents and context shortcuts; 231 tests across 22 files and all three browser scripts passed locally; merged in [PR #4](https://github.com/va3un/people-memory/pull/4). Routine phone/UI checks remain deferred.
+
+- Phase 6: full JSON/photo/history backup, CSV ZIP, vCard, validated import preview, conservative merge, protected atomic replacement and 30-day notice; 281 tests across 25 files and all four production browser scripts pass. Independent review and critical phone recovery acceptance remain pending.
 
 # Known problems
-- Phase 5 independent PR review is pending. Routine Phase 4/5 phone/UI checks are deferred until final testing; desktop Chromium automation is not a physical-phone test.
+- Phase 6 independent PR review and critical Android backup/restore acceptance are pending. Routine Phase 4/5 phone/UI checks are deferred until final testing; desktop Chromium automation is not a physical-phone test.
 - Outstanding acceptance observations, not explicitly verified: enlarged system text, under-20-second quick add, and Windows Call/WhatsApp handling. These are not confirmed defects and do not revoke acceptance of the verified Phase 3 core functionality.
-- Storage is unencrypted and local to this browser. Backup/export and Dropbox sync remain later phases. Use fictional test data only; clearing browser data or losing the device loses records.
-- The previously recorded low-severity serialize-javascript 7.1.2 build-tool advisory remains. Phase 5 adds only minisearch@7.2.0 and leaves all existing dependency versions unchanged.
+- Storage and downloaded exports are unencrypted. JSON backup/export/import is implemented in Phase 6 but is not yet accepted; Dropbox sync remains unavailable. Device settings are excluded from backups. Use fictional test data only; clearing site data or losing the device loses records unless a working downloaded backup exists.
+- The previously recorded low-severity serialize-javascript 7.1.2 build-tool advisory remains. Phase 6 adds only fflate@0.8.3 and leaves existing dependency versions unchanged. The production build reports a 617 kB JavaScript chunk; build succeeds and offline recovery passes, but physical-phone memory/performance near import limits remains unverified.
 
 # Decisions made
+- Added exact-pinned fflate@0.8.3 to create the roadmap-required four-file CSV ZIP entirely offline without a service. Existing database version, schema and record IDs are unchanged.
+- JSON merge adds missing IDs and retains all existing versions/tombstones. Same-name different IDs require review and stay separate. Replacement requires read-back verification of a fresh safety download and typed REPLACE, with a full-data stale check and one transaction.
 - Approved hybrid testing workflow: automated checks and independent PR review for every phase; routine phone/UI checks may wait for final testing. Backup/restore, Dropbox sync and real-data migration verification remain mandatory before accepting those features.
 - Added minisearch@7.2.0 for the roadmap-required local in-memory Phase 5 prefix/typo search index; existing package versions are unchanged.
 - Phase 4 uses the existing schema and tables without migrations, wiping records or converting existing ordinary people into Me.
