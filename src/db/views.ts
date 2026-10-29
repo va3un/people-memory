@@ -61,8 +61,16 @@ export async function readConnections(personId: string) {
     links.map(async (link) => {
       const forward = link.relative_id === personId
       const relative = await db.people.get(forward ? link.person_id : link.relative_id)
+      const photo =
+        relative && !relative.deleted
+          ? await db.photos
+              .where('person_id')
+              .equals(relative.id)
+              .filter((photo) => !photo.deleted)
+              .first()
+          : undefined
       return relative && !relative.deleted
-        ? { link, relative, type: forward ? link.type : reverseType(link.type) }
+        ? { link, relative, photo, type: forward ? link.type : reverseType(link.type) }
         : undefined
     }),
   )

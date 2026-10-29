@@ -51,8 +51,8 @@ export function Tabs({ items, initialTabId, className = '' }: TabsProps) {
               aria-controls={`${groupId}-${item.id}`}
               id={`${groupId}-tab-${item.id}`}
               onClick={() => setActiveId(item.id)}
-              className={`min-h-12 flex-1 rounded-xl px-3 text-sm font-medium transition-colors duration-150 ${
-                isActive ? 'bg-surface text-text shadow-sm' : 'text-accent'
+              className={`min-h-12 min-w-0 flex-1 rounded-xl px-3 text-base font-medium transition-colors duration-150 ease-out ${
+                isActive ? 'bg-surface text-text ' : 'text-accent'
               }`}
             >
               {item.label}

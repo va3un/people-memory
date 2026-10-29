@@ -29,7 +29,7 @@ export function RelatedPersonFields({
       <select
         id="related_to"
         aria-label="Related to"
-        className="h-12 w-full rounded-2xl border bg-surface px-3"
+        className="min-h-12 w-full rounded-2xl border bg-surface px-3 py-3"
         value={relatedTo}
         onChange={(event) => onPerson(event.target.value)}
       >
@@ -48,7 +48,7 @@ export function RelatedPersonFields({
           <select
             id="relationship_type"
             aria-label="Relationship type"
-            className="h-12 rounded-2xl border bg-surface px-3"
+            className="min-h-12 rounded-2xl border bg-surface px-3 py-3"
             value={relationshipType}
             onChange={(event) => onType(event.target.value as RelationshipType)}
           >

@@ -10,6 +10,8 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-danger: var(--danger);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger-foreground: var(--danger-foreground);
 
   --radius-card: 20px;
   --radius-sheet: 28px;
@@ -55,8 +57,11 @@
 
 @layer components {
   .page {
-    padding-left: var(--page-padding);
-    padding-right: var(--page-padding);
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
+    padding-left: max(var(--page-padding), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--page-padding), env(safe-area-inset-right, 0px));
   }
 
   .page-title {
@@ -67,8 +72,8 @@
   }
 
   .section-label {
-    font-size: 12px;
-    line-height: 18px;
+    font-size: 0.75rem;
+    line-height: 1.125rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -97,4 +102,115 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Minimum physical hit areas, including inline links and checkbox/radio labels. */
+a[href],
+button,
+summary,
+input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+select {
+  min-height: var(--tap-target);
+  min-width: var(--tap-target);
+}
+a[href]:not([class]),
+label:has(> input[type='checkbox']),
+label:has(> input[type='radio']) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--tap-target);
+}
+input,
+select,
+textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+button,
+summary,
+select {
+  overflow-wrap: anywhere;
+}
+button {
+  cursor: pointer;
+}
+button,
+a[href] {
+  transition-property: color, background-color, border-color, transform, filter;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.caption {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+.modal-panel {
+  max-height: 85dvh;
+  overscroll-behavior: contain;
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+}
+.sheet-enter {
+  animation: sheet-in 180ms ease-out;
+}
+.card {
+  transition:
+    border-color 150ms ease-out,
+    background-color 150ms ease-out,
+    transform 150ms ease-out;
+}
+a.card:hover {
+  border-color: var(--accent);
+}
+a.card:active,
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Toast library defaults use smaller type and fixed-height controls. */
+[data-sonner-toaster] {
+  font-family: var(--font-system) !important;
+}
+[data-sonner-toast] {
+  font-size: 1rem !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  flex-wrap: wrap;
+}
+[data-sonner-toast] [data-button] {
+  height: auto !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 1rem !important;
+  background: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+[data-sonner-toast] [data-close-button] {
+  top: 0;
+  left: 0;
+  transform: none;
+  position: relative;
+  order: 3;
+}
+
+/* Utility page padding must not hide the last action behind the fixed navigation. */
+.page {
+  padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
 }

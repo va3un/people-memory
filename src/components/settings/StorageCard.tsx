@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
-import { formatBytes, getStorageEstimate, getStorageStatus, requestPersistentStorage } from '../../lib/storage'
+import {
+  formatBytes,
+  getStorageEstimate,
+  getStorageStatus,
+  requestPersistentStorage,
+} from '../../lib/storage'
 import type { StorageStatus } from '../../lib/storage'
 
 const STATE_TEXT: Record<StorageStatus['state'], string> = {
@@ -20,7 +25,11 @@ export function StorageCard() {
   const refresh = useCallback(async () => {
     const [current, estimate] = await Promise.all([getStorageStatus(), getStorageEstimate()])
     setStatus(current)
-    setUsed(estimate && estimate.quota > 0 ? `${formatBytes(estimate.usage)} of ${formatBytes(estimate.quota)}` : null)
+    setUsed(
+      estimate && estimate.quota > 0
+        ? `${formatBytes(estimate.usage)} of ${formatBytes(estimate.quota)}`
+        : null,
+    )
   }, [])
 
   useEffect(() => {
@@ -40,14 +49,14 @@ export function StorageCard() {
 
   return (
     <Card className="mt-2 p-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="font-medium">Storage</p>
-          <p className="mt-0.5 text-sm text-muted">
+          <p className="mt-1 text-base text-muted">
             {status ? STATE_TEXT[status.state] : 'Checking...'}
           </p>
-          {status ? <p className="mt-1 text-xs text-muted">{status.message}</p> : null}
-          {used ? <p className="mt-1 text-xs text-muted">Space used: {used}</p> : null}
+          {status ? <p className="mt-1 text-base text-muted">{status.message}</p> : null}
+          {used ? <p className="mt-1 text-base text-muted">Space used: {used}</p> : null}
         </div>
         {status?.persisted ? null : (
           <Button variant="secondary" size="sm" onClick={askBrowser} disabled={busy}>

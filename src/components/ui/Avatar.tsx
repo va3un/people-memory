@@ -19,7 +19,16 @@ const palette = [
   '#CCFBF1',
 ]
 
-const textPalette = ['#3730A3', '#9D174D', '#166534', '#92400E', '#075985', '#86198F', '#9F1239', '#115E59']
+const textPalette = [
+  '#3730A3',
+  '#9D174D',
+  '#166534',
+  '#92400E',
+  '#075985',
+  '#86198F',
+  '#9F1239',
+  '#115E59',
+]
 
 // Picks a stable colour for a name using a simple hash.
 export function colorForName(name: string): { background: string; color: string } {
@@ -51,7 +60,7 @@ export function Avatar({ name, src, size = 56, className = '' }: AvatarProps) {
         alt={name}
         width={size}
         height={size}
-        className={`rounded-full object-cover ${className}`}
+        className={`shrink-0 rounded-full object-cover ${className}`}
         style={{ width: size, height: size }}
       />
     )
@@ -61,7 +70,7 @@ export function Avatar({ name, src, size = 56, className = '' }: AvatarProps) {
     <span
       role="img"
       aria-label={name}
-      className={`inline-flex items-center justify-center rounded-full font-semibold ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full font-semibold ${className}`}
       style={{
         width: size,
         height: size,

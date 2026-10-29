@@ -8,6 +8,8 @@ export function useModalFocus(open: boolean, onClose: () => void) {
   useEffect(() => {
     if (!open || !ref.current) return
     const panel = ref.current
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     const opener = document.activeElement as HTMLElement | null
     const controls = () =>
       Array.from(
@@ -15,7 +17,13 @@ export function useModalFocus(open: boolean, onClose: () => void) {
           'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
         ),
       )
-    const focusFirst = () => (controls()[0] ?? panel).focus()
+    // Keep the first form field / safe Cancel action focused when a close icon is added.
+    const focusFirst = () =>
+      (
+        controls().find((item) => item.getAttribute('aria-label') !== 'Close') ??
+        controls()[0] ??
+        panel
+      ).focus()
     focusFirst()
     const keydown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -47,6 +55,7 @@ export function useModalFocus(open: boolean, onClose: () => void) {
     document.addEventListener('keydown', keydown)
     document.addEventListener('focusin', focus)
     return () => {
+      document.body.style.overflow = previousOverflow
       document.removeEventListener('keydown', keydown)
       document.removeEventListener('focusin', focus)
       if (opener?.isConnected) opener.focus()
