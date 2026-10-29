@@ -14,7 +14,7 @@ import { useLiveData } from './lib/useLiveData'
 import { AddRoute } from './pages/AddPage'
 import { BrowsePage } from './pages/BrowsePage'
 import { DesignPage } from './pages/DesignPage'
-import { SearchPage } from './pages/SearchPage'
+import { DirectoryLayout } from './components/layout/DirectoryLayout'
 import { SettingsPage } from './pages/SettingsPage'
 
 // The app shell: four screens in the bottom bar plus a hidden design page.
@@ -40,8 +40,10 @@ export function App() {
           <MeSetupPage />
         ) : (
           <Routes>
-            <Route path="/" element={<SearchPage />} />
-            <Route path="/people/:id" element={<PersonPage />} />
+            <Route element={<DirectoryLayout />}>
+              <Route index element={null} />
+              <Route path="/people/:id" element={<PersonPage embedded />} />
+            </Route>
             <Route path="/people/:id/edit" element={<EditPersonPage />} />
             <Route path="/add" element={<AddRoute />} />
             <Route path="/contexts/:id" element={<ContextPage />} />

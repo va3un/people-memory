@@ -31,7 +31,9 @@ export function Toaster() {
   return (
     <SonnerToaster
       position="top-center"
+      theme="system"
       richColors={false}
+      expand
       closeButton
       toastOptions={{
         classNames: {

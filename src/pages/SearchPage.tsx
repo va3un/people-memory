@@ -9,12 +9,22 @@ import { useSearchDirectory } from '../search/DirectoryProvider'
 import { popularContexts, recentPeople } from '../search/recents'
 import type { Person } from '../db/schema'
 
-export function SearchPage() {
+export function SearchPage({
+  embedded = false,
+  active = true,
+}: {
+  embedded?: boolean
+  active?: boolean
+}) {
+  const Container = embedded ? 'section' : 'main'
   const { data, engine, error } = useSearchDirectory()
   const [query, setQuery] = useState('')
   const [limit, setLimit] = useState(50)
   const [recentLimit, setRecentLimit] = useState(12)
   const input = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (active) input.current?.focus()
+  }, [active])
   const results = useMemo(() => engine?.search(query) ?? [], [engine, query])
   const recents = useMemo(() => (data ? recentPeople(data) : undefined), [data])
   const contexts = useMemo(() => (data ? popularContexts(data) : []), [data])
@@ -25,7 +35,7 @@ export function SearchPage() {
     <SearchPersonCard person={person} reason={reason} />
   )
   return (
-    <main className="page mx-auto w-full max-w-md pb-28 pt-6">
+    <Container aria-label="People search" className="page mx-auto w-full max-w-md pb-28 pt-6">
       <h1 className="page-title">Search</h1>
       <p className="mt-2 text-muted">Find anyone by a name, relative or place.</p>
       <div className="relative mt-5">
@@ -37,12 +47,12 @@ export function SearchPage() {
         <Input
           name="search"
           type="search"
-          autoFocus
+          autoFocus={active}
           aria-label="Search people"
           placeholder="Name, relative, workplace, school…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="h-14 rounded-full pl-11 pr-14"
+          className="min-h-14 rounded-full pl-11 pr-14"
           ref={input}
         />
         {query && (
@@ -76,7 +86,7 @@ export function SearchPage() {
           </p>
           {results.length === 0 && (
             <div>
-              <p>No people match these clues. Try a shorter name or a different clue.</p>
+              <p>No people match these clues.</p>
               <Link className="flex min-h-12 items-center text-accent" to="/add">
                 Add a person
               </Link>
@@ -129,8 +139,8 @@ export function SearchPage() {
             <section aria-label="Recently added" className="mt-6">
               <h2 className="section-label">Recently added</h2>
               {recents?.added.length === 0 && (
-                <div className="mt-3">
-                  <p>No people yet. Add a fictional person to get started.</p>
+                <div className="card mt-3 p-4">
+                  <p>No people yet. Add someone to get started.</p>
                   <Link className="flex min-h-12 items-center text-accent" to="/add">
                     Add a person
                   </Link>
@@ -154,6 +164,6 @@ export function SearchPage() {
           </>
         )
       )}
-    </main>
+    </Container>
   )
 }

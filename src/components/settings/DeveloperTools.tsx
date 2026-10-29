@@ -4,7 +4,12 @@ import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
 import { Dialog } from '../ui/Dialog'
 import { showToast } from '../ui/Toast'
-import { COUNT_LABELS, countRecords, loadSampleData, softDeleteSampleData } from '../../db/operations'
+import {
+  COUNT_LABELS,
+  countRecords,
+  loadSampleData,
+  softDeleteSampleData,
+} from '../../db/operations'
 import type { RecordCounts } from '../../db/operations'
 
 // The word a developer must type to delete the sample data, so a stray tap cannot do it.
@@ -31,7 +36,8 @@ export function DeveloperTools() {
       await refresh()
       showToast({
         message: 'Sample data loaded',
-        description: 'Missing or unchanged deleted sample records were loaded. Edited records were kept.',
+        description:
+          'Missing or unchanged deleted sample records were loaded. Edited records were kept.',
       })
     } finally {
       setBusy(false)
@@ -47,7 +53,8 @@ export function DeveloperTools() {
       setConfirmText('')
       showToast({
         message: 'Sample data deleted',
-        description: 'Unchanged sample records were deleted. Edited records and samples used by new links or photos were kept.',
+        description:
+          'Unchanged sample records were deleted. Edited records and samples used by new links or photos were kept.',
       })
     } finally {
       setBusy(false)
@@ -64,20 +71,21 @@ export function DeveloperTools() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="font-medium">Test data only</p>
-            <p className="mt-0.5 text-sm text-muted">
-              These tools manage unchanged fictional sample records. Edited records and samples used by new links or photos are kept.
+            <p className="mt-1 text-base text-muted">
+              These tools manage unchanged fictional sample records. Edited records and samples used
+              by new links or photos are kept.
             </p>
           </div>
-          <span className="shrink-0 rounded-chip bg-accent-soft px-3 py-1 text-xs font-medium text-accent">
-            Test data only
-          </span>
         </div>
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+        <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
           {COUNT_LABELS.map((item) => (
-            <div key={item.key} className="flex items-center justify-between border-b border-border py-1">
-              <dt className="text-sm text-muted">{item.label}</dt>
-              <dd className="text-sm font-medium">{counts ? counts[item.key] : '-'}</dd>
+            <div
+              key={item.key}
+              className="flex min-w-0 items-center justify-between gap-3 border-b border-border py-1"
+            >
+              <dt className="min-w-0 break-words text-base text-muted">{item.label}</dt>
+              <dd className="shrink-0 text-base font-medium">{counts ? counts[item.key] : '-'}</dd>
             </div>
           ))}
         </dl>
@@ -117,8 +125,8 @@ export function DeveloperTools() {
         }
       >
         <p>
-          This removes the fictional sample people, contexts and relationships from this app. Records are
-          marked as deleted, so nothing is really erased yet.
+          This removes the fictional sample people, contexts and relationships from this app.
+          Records are marked as deleted, so nothing is really erased yet.
         </p>
         <p className="mt-3">Edited records and samples used by new links or photos are kept.</p>
         <p className="mt-3">Type {CONFIRM_WORD} to confirm.</p>
@@ -127,7 +135,7 @@ export function DeveloperTools() {
           value={confirmText}
           onChange={(event) => setConfirmText(event.target.value)}
           placeholder={CONFIRM_WORD}
-          className="mt-2 h-12 w-full rounded-2xl border border-border bg-background px-4 text-base"
+          className="mt-2 min-h-12 py-3 w-full rounded-2xl border border-border bg-background px-4 text-base"
         />
       </Dialog>
     </section>

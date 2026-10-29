@@ -123,7 +123,7 @@ export function ContextPicker({
               <label htmlFor="context_kind">Kind</label>
               <select
                 id="context_kind"
-                className="h-12 rounded-2xl border bg-surface px-3"
+                className="min-h-12 rounded-2xl border bg-surface px-3 py-3"
                 value={kind}
                 onChange={(e) => setKind(e.target.value as ContextKind)}
               >

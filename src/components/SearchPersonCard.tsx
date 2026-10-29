@@ -27,7 +27,7 @@ export function SearchPersonCard({ person, reason }: { person: Person; reason?: 
       aria-labelledby={label}
       aria-describedby={reason ? why : undefined}
     >
-      <span aria-hidden="true">
+      <span aria-hidden="true" className="shrink-0">
         <PersonAvatar name={person.full_name} photo={photo} size={56} />
       </span>
       <div className="min-w-0 flex-1">
@@ -35,7 +35,7 @@ export function SearchPersonCard({ person, reason }: { person: Person; reason?: 
           {person.full_name}
         </p>
         {reason && (
-          <p id={why} className="truncate text-accent" title={reason}>
+          <p id={why} className="break-words text-accent" title={reason}>
             {reason}
           </p>
         )}

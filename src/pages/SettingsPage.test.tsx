@@ -44,8 +44,8 @@ function buttonByText(
 }
 
 // Finds a button inside the open dialog only.
-function dialogButton(container: HTMLElement, text: string): HTMLButtonElement | undefined {
-  const dialog = container.querySelector('[role="dialog"]')
+function dialogButton(text: string): HTMLButtonElement | undefined {
+  const dialog = document.body.querySelector('[role="dialog"]')
   if (!dialog) return undefined
   return Array.from(dialog.querySelectorAll('button')).find(
     (button) => (button.textContent ?? '').trim() === text,
@@ -65,8 +65,10 @@ async function waitFor(check: () => boolean | Promise<boolean>, tries = 40) {
 }
 
 // Types the confirmation word into the box in the dialog.
-async function typeConfirmationWord(container: HTMLElement) {
-  const input = container.querySelector('input[aria-label="Confirmation word"]') as HTMLInputElement
+async function typeConfirmationWord() {
+  const input = document.body.querySelector(
+    'input[aria-label="Confirmation word"]',
+  ) as HTMLInputElement
   await act(async () => {
     const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
     setter?.call(input, 'DELETE')
@@ -126,8 +128,8 @@ describe('settings developer tools', () => {
       button?.click()
     })
 
-    expect(container.textContent).toContain('Delete sample data?')
-    expect(container.textContent).toContain('Type DELETE to confirm')
+    expect(document.body.textContent).toContain('Delete sample data?')
+    expect(document.body.textContent).toContain('Type DELETE to confirm')
     unmount()
   })
 
@@ -139,12 +141,12 @@ describe('settings developer tools', () => {
       buttonByText(container, 'Delete sample data')?.click()
     })
 
-    const deleteButton = dialogButton(container, 'Delete sample data') as HTMLButtonElement
+    const deleteButton = dialogButton('Delete sample data') as HTMLButtonElement
     expect(deleteButton.disabled).toBe(true)
 
-    await typeConfirmationWord(container)
+    await typeConfirmationWord()
 
-    const enabledButton = dialogButton(container, 'Delete sample data') as HTMLButtonElement
+    const enabledButton = dialogButton('Delete sample data') as HTMLButtonElement
     expect(enabledButton.disabled).toBe(false)
 
     await act(async () => {
@@ -177,9 +179,9 @@ describe('settings developer tools', () => {
     await act(async () => {
       buttonByText(container, 'Delete sample data')?.click()
     })
-    await typeConfirmationWord(container)
+    await typeConfirmationWord()
     await act(async () => {
-      ;(dialogButton(container, 'Delete sample data') as HTMLButtonElement).click()
+      ;(dialogButton('Delete sample data') as HTMLButtonElement).click()
     })
 
     await waitFor(() => buttonByText(container, 'Delete sample data')?.disabled === false)

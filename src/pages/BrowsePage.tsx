@@ -1,4 +1,4 @@
-// Browse lists live context and category counts; full clue search stays in Phase 5.
+// Browse groups people by context and category, with readable, wrapping counts.
 import { Link } from 'react-router-dom'
 import { Tabs } from '../components/ui/Tabs'
 import { useLiveData } from '../lib/useLiveData'
@@ -33,7 +33,7 @@ export function BrowsePage() {
                   {data?.contexts.map(({ context, count }) => (
                     <li key={context.id}>
                       <Link
-                        className="card flex min-h-20 items-center justify-between gap-3 p-4"
+                        className="card flex min-h-20 flex-wrap items-center justify-between gap-3 p-4"
                         to={`/contexts/${context.id}`}
                       >
                         <div className="min-w-0">
@@ -70,10 +70,10 @@ export function BrowsePage() {
                   {data?.categories.map((category) => (
                     <li key={category.key}>
                       <Link
-                        className="card flex min-h-16 items-center justify-between gap-3 p-4"
+                        className="card flex min-h-16 flex-wrap items-center justify-between gap-3 p-4"
                         to={`/categories/${encodeURIComponent(category.key)}`}
                       >
-                        <span>{category.name}</span>
+                        <span className="min-w-0 break-words">{category.name}</span>
                         <span>
                           {category.count} {category.count === 1 ? 'person' : 'people'}
                         </span>

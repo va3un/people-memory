@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import type { InputHTMLAttributes, ReactNode, Ref } from 'react'
 
 export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
@@ -9,9 +10,13 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
 
 // A single-line text field with an optional label above it.
 export function Input({ label, hint, className = '', id, ...rest }: InputProps) {
-  const inputId = id ?? rest.name
+  const generatedId = useId()
+  const inputId = id ?? rest.name ?? generatedId
+  const description =
+    [rest['aria-describedby'], hint ? `${inputId}-hint` : undefined].filter(Boolean).join(' ') ||
+    undefined
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex min-w-0 flex-col gap-2">
       {label ? (
         <label htmlFor={inputId} className="text-base font-medium text-text">
           {label}
@@ -19,10 +24,15 @@ export function Input({ label, hint, className = '', id, ...rest }: InputProps) 
       ) : null}
       <input
         id={inputId}
-        className={`h-12 w-full rounded-2xl border border-border bg-surface px-4 text-base text-text placeholder:text-muted focus:border-accent focus:outline-none ${className}`}
+        className={`min-h-12 py-3 w-full rounded-2xl border border-border bg-surface px-4 text-base text-text placeholder:text-muted focus:border-accent aria-invalid:border-danger ${className}`}
         {...rest}
+        aria-describedby={description}
       />
-      {hint ? <p className="text-[13px] leading-[18px] text-muted">{hint}</p> : null}
+      {hint ? (
+        <p id={`${inputId}-hint`} className="caption text-muted">
+          {hint}
+        </p>
+      ) : null}
     </div>
   )
 }

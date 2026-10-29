@@ -9,3 +9,15 @@ afterEach(() => {
   // Nothing global to clean up yet. Storage helpers are added in later phases.
   document.body.innerHTML = ''
 })
+
+// jsdom does not implement matchMedia; real browsers supply OS theme and viewport queries.
+window.matchMedia = (media: string) => ({
+  media,
+  matches: false,
+  onchange: null,
+  addListener() {},
+  removeListener() {},
+  addEventListener() {},
+  removeEventListener() {},
+  dispatchEvent: () => false,
+})

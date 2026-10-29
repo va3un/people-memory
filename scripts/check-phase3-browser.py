@@ -84,6 +84,8 @@ with sync_playwright() as p:
     expect(page.get_by_role('dialog')).to_be_visible()
     expect(page.get_by_role('button', name='Cancel', exact=True)).to_be_focused()
     page.keyboard.press('Shift+Tab')
+    expect(page.get_by_role('button', name='Close', exact=True)).to_be_focused()
+    page.keyboard.press('Shift+Tab')
     expect(page.get_by_role('button', name='Confirm delete', exact=True)).to_be_focused()
     page.get_by_role('button', name='Confirm delete', exact=True).click()
     expect(page.get_by_role('heading', name='Search', exact=True)).to_be_visible()

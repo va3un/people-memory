@@ -127,7 +127,7 @@ export function RelativeSheet({ person, onClose }: { person: Person; onClose: ()
               <label htmlFor="relative_gender">New person's gender</label>
               <select
                 id="relative_gender"
-                className="h-12 rounded-2xl border bg-surface px-3"
+                className="min-h-12 rounded-2xl border bg-surface px-3 py-3"
                 value={gender}
                 onChange={(e) => setGender(e.target.value as Gender)}
               >
@@ -144,7 +144,7 @@ export function RelativeSheet({ person, onClose }: { person: Person; onClose: ()
           <select
             id="relative_type"
             aria-label="Relationship type"
-            className="h-12 rounded-2xl border bg-surface px-3"
+            className="min-h-12 rounded-2xl border bg-surface px-3 py-3"
             value={type}
             onChange={(e) => setType(e.target.value as RelationshipType)}
           >

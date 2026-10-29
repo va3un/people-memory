@@ -6,6 +6,7 @@ import { readConnections } from '../db/views'
 import { addToContext } from '../db/contexts'
 import { relationshipLabel } from '../domain/relationships'
 import type { Person } from '../db/schema'
+import { PersonAvatar } from './PersonAvatar'
 import { RelativeSheet } from './relationships/RelativeSheet'
 import { ContextPicker } from './contexts/ContextPicker'
 import { Button } from './ui/Button'
@@ -24,13 +25,18 @@ export function ProfileConnections({ person }: { person: Person }) {
         {!data && !error && <p role="status">Loading relatives…</p>}
         {data?.relatives.length === 0 && <p className="text-muted">No relatives linked yet.</p>}
         <ul>
-          {data?.relatives.map(({ link, relative, type }) => (
+          {data?.relatives.map(({ link, relative, photo, type }) => (
             <li key={link.id}>
               <Link
-                className="my-2 flex min-h-12 items-center rounded-2xl border p-3 text-accent"
+                className="card my-2 flex min-h-12 items-center gap-3 p-3 text-accent"
                 to={`/people/${relative.id}`}
               >
-                {relationshipLabel(type, relative.gender)}: {relative.full_name}
+                <span aria-hidden="true" className="shrink-0">
+                  <PersonAvatar name={relative.full_name} photo={photo} size={56} />
+                </span>
+                <span>
+                  {relationshipLabel(type, relative.gender)}: {relative.full_name}
+                </span>
               </Link>
             </li>
           ))}
