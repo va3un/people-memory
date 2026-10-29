@@ -1,3 +1,4 @@
+import { SyncSettings } from '../sync/SyncSettings'
 import { ProviderSettings } from '../components/settings/ProviderSettings'
 import { CaptureSettings } from '../components/settings/CaptureSettings'
 import { BackupCard } from '../components/settings/BackupCard'
@@ -19,6 +20,7 @@ export function SettingsPage() {
         <StorageCard />
       </section>
 
+      <SyncSettings />
       <BackupCard />
       <CaptureSettings />
       <ProviderSettings />
@@ -38,12 +40,6 @@ export function SettingsPage() {
         </Card>
       </section>
 
-      <section className="mt-6">
-        <p className="section-label">Coming next</p>
-        <Card className="mt-2 divide-y divide-border">
-          <p className="p-4 text-sm text-muted">Sync with Dropbox (Phase 9)</p>
-        </Card>
-      </section>
     </main>
   )
 }

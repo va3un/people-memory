@@ -27,7 +27,7 @@ export default defineConfig({
             attrs: {
               'http-equiv': 'Content-Security-Policy',
               content:
-                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' https://openrouter.ai https://generativelanguage.googleapis.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'",
+                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' https://openrouter.ai https://generativelanguage.googleapis.com https://api.dropboxapi.com https://content.dropboxapi.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'",
             },
             injectTo: 'head-prepend',
           },

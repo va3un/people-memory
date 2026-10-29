@@ -1,3 +1,4 @@
+import { SyncRuntime } from './sync/SyncRuntime'
 import { DirectoryProvider } from './search/DirectoryProvider'
 import { Route, Routes } from 'react-router-dom'
 import { BottomNav } from './components/layout/BottomNav'
@@ -23,6 +24,7 @@ export function App() {
 
   return (
     <DirectoryProvider>
+      <SyncRuntime />
       <div className="min-h-dvh bg-background text-text">
         {error ? (
           <main className="page py-6">
