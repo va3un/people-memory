@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { requestInitialPersistence } from './lib/persistence'
 import { SyncRuntime } from './sync/SyncRuntime'
 import { DirectoryProvider } from './search/DirectoryProvider'
 import { Route, Routes } from 'react-router-dom'
@@ -21,6 +23,14 @@ import { SettingsPage } from './pages/SettingsPage'
 export function App() {
   usePwaUpdate()
   const { data: me, error } = useLiveData(readMe)
+  const storageReady = me !== undefined && !error
+  useEffect(() => {
+    if (storageReady)
+      void requestInitialPersistence().catch(() => {
+        // A storage-permission failure must never prevent local use or change directory records.
+        // Settings continues to show the actual browser status and backup reminder.
+      })
+  }, [storageReady, me?.id])
 
   return (
     <DirectoryProvider>

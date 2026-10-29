@@ -42,6 +42,7 @@ with sync_playwright() as p:
     def rows(table):
         return page.evaluate('''async table => {const d=await new Promise(r=>{const q=indexedDB.open('people-memory');q.onsuccess=()=>r(q.result)});return await new Promise(r=>{const q=d.transaction(table).objectStore(table).getAll();q.onsuccess=()=>r(q.result.map(({blob,...record})=>record))})}''', table)
     before = rows('people')
+    device_settings_before = rows('deviceSettings')
     search.fill('Meera')
     expect(results.locator('li').first.get_by_role('link')).to_have_accessible_name('Meera Joshi')
     expect(results.get_by_text('Husband of Meera Joshi', exact=True)).to_be_visible()
@@ -175,7 +176,9 @@ with sync_playwright() as p:
     assert not errors, errors
     assert not csp, csp
     assert not external, external
-    assert rows('deviceSettings') == []
+    # Search must not persist its index/queries; the sole allowed device row is eviction protection.
+    assert all(row['key']=='storage:initialPersistenceRequest' for row in device_settings_before)
+    assert rows('deviceSettings') == device_settings_before
     print(json.dumps({'passed':['roadmap clue scenarios','ranked explanations','Devanagari and typos','read-only queries','context shortcuts','local recents without contact timestamp changes','cross-tab name/alias/membership/relationship refresh','delete and Undo refresh','visible JPEG thumbnails','offline reload/add/search','2000-person search and pagination'], 'scale_lookup_ms': elapsed_ms, 'page_errors':errors,'external_requests':external}, indent=2))
     browser.close()
 server.shutdown()

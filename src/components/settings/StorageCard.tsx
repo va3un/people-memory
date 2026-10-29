@@ -1,5 +1,6 @@
-// Shows whether the browser has promised to keep this app's data.
-// Browsers can clear site data, so we ask and then show the answer plainly.
+// Show current browser eviction protection without implying a backup or permanent storage.
+import { useLiveData } from '../../lib/useLiveData'
+import { readPersistenceRequest } from '../../lib/persistence'
 import { useCallback, useEffect, useState } from 'react'
 import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
@@ -18,6 +19,7 @@ const STATE_TEXT: Record<StorageStatus['state'], string> = {
 }
 
 export function StorageCard() {
+  const { data: attempt } = useLiveData(readPersistenceRequest)
   const [status, setStatus] = useState<StorageStatus | null>(null)
   const [used, setUsed] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -34,7 +36,7 @@ export function StorageCard() {
 
   useEffect(() => {
     void refresh()
-  }, [refresh])
+  }, [refresh, attempt])
 
   const askBrowser = async () => {
     setBusy(true)
@@ -58,7 +60,7 @@ export function StorageCard() {
           {status ? <p className="mt-1 text-base text-muted">{status.message}</p> : null}
           {used ? <p className="mt-1 text-base text-muted">Space used: {used}</p> : null}
         </div>
-        {status?.persisted ? null : (
+        {status?.state === 'denied' && (
           <Button variant="secondary" size="sm" onClick={askBrowser} disabled={busy}>
             Keep my data
           </Button>
