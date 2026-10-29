@@ -2,8 +2,8 @@
 // keep this app's data and we tell Varun what the browser answered.
 
 export type StorageStatus = {
-  // 'granted' means the browser promises to keep the data.
-  // 'denied' means the browser may clear it at any time.
+  // 'granted' means protection against automatic eviction, not against manual clearing or loss.
+  // 'denied' means best-effort storage, which the browser can evict.
   // 'unsupported' means this browser has no such promise.
   state: 'granted' | 'denied' | 'unsupported'
   persisted: boolean
@@ -12,11 +12,16 @@ export type StorageStatus = {
 
 // Asks the browser to keep the app's data. Safe to call more than once.
 export async function requestPersistentStorage(): Promise<StorageStatus> {
-  if (typeof navigator === 'undefined' || !navigator.storage?.persist) {
+  if (
+    typeof navigator === 'undefined' ||
+    !navigator.storage?.persist ||
+    !navigator.storage?.persisted
+  ) {
     return {
       state: 'unsupported',
       persisted: false,
-      message: 'This browser cannot promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
+      message:
+        'This browser cannot promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   }
 
@@ -34,7 +39,8 @@ export async function requestPersistentStorage(): Promise<StorageStatus> {
     return {
       state: 'denied',
       persisted: false,
-      message: 'The browser would not promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
+      message:
+        'The browser would not promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   }
 }
@@ -45,7 +51,8 @@ export async function getStorageStatus(): Promise<StorageStatus> {
     return {
       state: 'unsupported',
       persisted: false,
-      message: 'This browser cannot promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
+      message:
+        'This browser cannot promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   }
   try {
@@ -61,7 +68,8 @@ export async function getStorageStatus(): Promise<StorageStatus> {
     return {
       state: 'denied',
       persisted: false,
-      message: 'The browser would not promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
+      message:
+        'The browser would not promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   }
 }
