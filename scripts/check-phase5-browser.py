@@ -68,6 +68,7 @@ with sync_playwright() as p:
     expect(results.get_by_text('No people match these clues.', exact=False)).to_be_visible()
     assert rows('people') == before
     page.get_by_role('link', name='Add', exact=True).click()
+    page.get_by_role('link', name='Use the form instead', exact=True).click()
     page.get_by_role('textbox', name='Full name', exact=True).fill('Tarika Gupta')
     page.get_by_role('button', name='Save', exact=True).click()
     expect(page.get_by_role('link', name='View saved person', exact=True)).to_be_visible()
@@ -147,6 +148,7 @@ with sync_playwright() as p:
     offline_search.fill('fictional new child mother')
     expect(offline_results.get_by_role('link', name='Fictional Renamed Meera', exact=True)).to_be_visible()
     offline.get_by_role('link', name='Add', exact=True).click()
+    offline.get_by_role('link', name='Use the form instead', exact=True).click()
     offline.get_by_role('textbox', name='Full name', exact=True).fill('Fictional Offline Search')
     offline.get_by_role('button', name='Save', exact=True).click()
     offline.get_by_role('link', name='Search', exact=True).click()

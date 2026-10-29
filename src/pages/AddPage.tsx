@@ -1,4 +1,5 @@
 // Quick add and editing keep drafts intact when validation, image decoding or storage fails.
+import { CapturePage } from './CapturePage'
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ContextField } from '../components/contexts/ContextField'
@@ -238,5 +239,6 @@ export function AddPage({
 export function AddRoute() {
   const [params] = useSearchParams()
   const contextId = params.get('context')
+  if (!contextId && params.get('form') !== '1') return <CapturePage />
   return <AddPage key={contextId ?? 'new'} initialContext={contextId ? { contextId } : undefined} />
 }

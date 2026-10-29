@@ -78,7 +78,7 @@ it('requires a fictional Me name on upgrade, preserves the old person, and skips
 })
 it('defers context creation until the enclosing person save and cancels without writing', async () => {
   await createMe('Fictional Me', [])
-  const container = await render('/add')
+  const container = await render('/add?form=1')
   await click(button('Choose a context', container))
   await click(button('Create context'))
   await type('context_name', 'Fictional Draft School')
