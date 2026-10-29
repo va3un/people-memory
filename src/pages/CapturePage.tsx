@@ -1,4 +1,5 @@
-// Copy/paste capture works offline and never calls an external provider or sends saved directory data.
+// Copy/paste stays local; optional automatic answers share its parser, resolver and safe review.
+import { AutomaticAction } from '../components/capture/AutomaticAction'
 import { useRef, useState } from 'react'
 import { parseCapture } from '../capture/schema'
 import { buildPrompt, SHARING_NOTICE } from '../capture/prompt'
@@ -16,7 +17,8 @@ import { useUnsavedDraft } from '../lib/useUnsavedDraft'
 export function CapturePage() {
   const [passage, setPassage] = useState(''),
     [answer, setAnswer] = useState(''),
-    [review, setReview] = useState<Review>()
+    [review, setReview] = useState<Review>(),
+    [automaticBusy, setAutomaticBusy] = useState(false)
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [message, setMessage] = useState(''),
@@ -59,8 +61,8 @@ export function CapturePage() {
     >
       <h1 className="page-title">Smart capture</h1>
       <p className="mt-3">
-        Copy and paste mode. Use fictional data only. Nothing is saved until you review and tap
-        Save. No API key is needed.
+        Copy and paste works without a key. Optional automatic mode is configured in Settings. Use
+        fictional data only. Nothing is saved until you review and tap Save. No API key is needed.
       </p>
       <a className="flex min-h-12 items-center text-accent" href="#/add?form=1">
         Use the form instead
@@ -75,7 +77,25 @@ export function CapturePage() {
           {message}
         </p>
       )}
-      <fieldset disabled={busy} className="min-w-0 space-y-4 mt-3">
+      {!review && (
+        <AutomaticAction
+          purpose="draft"
+          passage={passage}
+          disabled={busy}
+          onBusy={setAutomaticBusy}
+          onDraft={(result, text) => {
+            setAnswer(text)
+            setReview(result)
+            setTimeout(() => headingRef.current?.focus(), 0)
+          }}
+          onFallback={() =>
+            setMessage(
+              'Use Copy prompt, then paste the chatbot answer and tap Read it. No API key is required.',
+            )
+          }
+        />
+      )}
+      <fieldset disabled={busy || automaticBusy} className="min-w-0 space-y-4 mt-3">
         {!review && (
           <>
             <label className="block font-semibold">
