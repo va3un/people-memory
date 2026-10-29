@@ -479,18 +479,22 @@ it('a late local write failure rolls back merged rows and conflict copies and re
   expect(await conflicts()).toHaveLength(1)
 })
 it('account switching stays paused and preserves the old account recovery snapshot and every local record', async () => {
-  const person = await createPerson(personDefaults('Fictional Old Account')),
-    old = (await readAuth())!
+  const person = await createPerson(personDefaults('Fictional Old Account'))
+  await putSetting(AUTH, { ...(await readAuth())!, account: 'dbid:fictional-old-account' })
+  const old = (await readAuth())!
   await enableSync(old, 'SYNC')
+  await syncNow()
   const oldSnapshot = await getSetting(snapshotKey(old))
   await disconnect()
   const url = new URL(await startAuthorization('http://localhost:5173'))
-  server.fetch = server.fetch
   await finishAuthorization(
     'http://localhost:5173?code=fictional&state=' + url.searchParams.get('state'),
   )
   const next = (await readAuth())!
   expect(next.enabled).toBe(false)
+  expect(next.account).not.toBe(old.account)
+  expect((await readState(next)).baseline).toEqual({})
+  expect(Object.keys((await readState(old)).baseline)).toHaveLength(1)
   expect(await getSetting(snapshotKey(old))).toEqual(oldSnapshot)
   expect(await db.people.get(person.id)).toEqual(person)
 })
