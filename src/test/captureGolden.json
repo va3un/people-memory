@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "people": [
+    {
+      "ref": "p1",
+      "full_name": "Sanket Bobhate",
+      "maiden_name": null,
+      "gender": "male",
+      "gender_source": "stated",
+      "nicknames": [],
+      "category": "Friend",
+      "how_i_know": "School and college friend",
+      "notes": "",
+      "phones": [],
+      "city": null,
+      "assumed": []
+    },
+    {
+      "ref": "p2",
+      "full_name": "Tarika Gupta",
+      "maiden_name": null,
+      "gender": "female",
+      "gender_source": "stated",
+      "nicknames": [],
+      "category": "Relative",
+      "how_i_know": "Sanket's wife",
+      "notes": "",
+      "phones": [],
+      "city": null,
+      "assumed": []
+    },
+    {
+      "ref": "p3",
+      "full_name": "Kiara",
+      "maiden_name": null,
+      "gender": "female",
+      "gender_source": "stated",
+      "nicknames": [],
+      "category": "Relative",
+      "how_i_know": "Sanket and Tarika's daughter",
+      "notes": "",
+      "phones": [],
+      "city": null,
+      "assumed": []
+    }
+  ],
+  "contexts": [
+    {
+      "ref": "c1",
+      "name": null,
+      "kind": "school",
+      "same_as_me": true
+    },
+    {
+      "ref": "c2",
+      "name": null,
+      "kind": "college",
+      "same_as_me": true
+    }
+  ],
+  "memberships": [
+    {
+      "person": "p1",
+      "context": "c1",
+      "role": "Student",
+      "period": null
+    },
+    {
+      "person": "p1",
+      "context": "c2",
+      "role": "Student",
+      "period": null
+    }
+  ],
+  "relationships": [
+    {
+      "a": "p1",
+      "b": "p2",
+      "type": "spouse"
+    },
+    {
+      "a": "p3",
+      "b": "p1",
+      "type": "child"
+    },
+    {
+      "a": "p3",
+      "b": "p2",
+      "type": "child"
+    },
+    {
+      "a": "p1",
+      "b": "ME",
+      "type": "friend"
+    }
+  ],
+  "uncertain": [
+    "Kiara's surname was not stated",
+    "Tarika's maiden name was not stated"
+  ]
+}
