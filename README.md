@@ -29,6 +29,8 @@ Licensed under the MIT License.
 
 ## Current status and browser checks
 
-Phase 5 clue search is implemented and awaiting independent PR review. Contexts, Browse, relatives and Me setup remain available. Routine phone/UI checks may be deferred until final testing under the approved hybrid workflow; critical backup/restore, sync and real-data migration checks remain acceptance gates. Backup and sync are not available yet. Use fictional data only. Browser storage is unencrypted and can be lost if site data is cleared or the device is lost.
+Phase 6 backup/export/import is implemented for independent review. Phase 3–5 people, contexts, relationships and clue search remain available. Full JSON backups include photos and deleted records; CSV ZIP and vCard are convenience exports. Safe JSON import offers a read-only preview and merge or guarded replacement. See [backup and recovery](docs/BACKUP_FORMAT.md) for limits and instructions.
 
-After `npm run build`, `python scripts/check-phase3-browser.py`, `python scripts/check-phase4-browser.py` and `python scripts/check-phase5-browser.py` run production browser checks using free Python Playwright and Chromium, if installed. The script uses an ephemeral local server and a disposable browser profile with fictional records and generated images. It does not access your normal browser or deploy the app.
+Use fictional data only. Browser storage and downloaded exports are unencrypted. Dropbox sync is unavailable. Routine phone/UI observations may wait for final testing; independent review and critical physical-phone backup/restore testing remain required before Phase 6 acceptance.
+
+After `npm run build`, `python scripts/check-phase3-browser.py`, `python scripts/check-phase4-browser.py` `python scripts/check-phase5-browser.py` and `python scripts/check-phase6-browser.py` run production browser checks using free Python Playwright and Chromium, if installed. The script uses an ephemeral local server and a disposable browser profile with fictional records and generated images. It does not access your normal browser or deploy the app.

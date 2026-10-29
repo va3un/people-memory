@@ -11,6 +11,7 @@ export function useUnsavedDraft(dirty: boolean) {
     const click = (event: MouseEvent) => {
       const link = (event.target as Element).closest('a[href]') as HTMLAnchorElement | null
       if (!link || link.href === window.location.href || link.target === '_blank') return
+      if (link.hasAttribute('download') && link.href.startsWith('blob:')) return
       if (!window.confirm('Leave this page and discard your unsaved changes?')) {
         event.preventDefault()
         event.stopPropagation()

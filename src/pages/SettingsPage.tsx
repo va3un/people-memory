@@ -1,3 +1,4 @@
+import { BackupCard } from '../components/settings/BackupCard'
 import { AboutYou } from '../components/settings/AboutYou'
 import { APP_VERSION } from '../lib/appVersion'
 import { Card } from '../components/ui/Card'
@@ -5,7 +6,7 @@ import { Chip } from '../components/ui/Chip'
 import { DeveloperTools } from '../components/settings/DeveloperTools'
 import { StorageCard } from '../components/settings/StorageCard'
 
-// The Settings screen. Sync and backup arrive in later phases.
+// Settings provides verified local backups; Dropbox sync remains a later phase.
 export function SettingsPage() {
   return (
     <main className="page mx-auto w-full max-w-md pb-28 pt-6">
@@ -16,6 +17,7 @@ export function SettingsPage() {
         <StorageCard />
       </section>
 
+      <BackupCard />
       <AboutYou />
       <DeveloperTools />
 
@@ -36,7 +38,6 @@ export function SettingsPage() {
         <p className="section-label">Coming next</p>
         <Card className="mt-2 divide-y divide-border">
           <p className="p-4 text-sm text-muted">Sync with Dropbox (Phase 9)</p>
-          <p className="p-4 text-sm text-muted">Backup and export (Phase 6)</p>
           <p className="p-4 text-sm text-muted">Smart capture settings (Phase 8)</p>
         </Card>
       </section>

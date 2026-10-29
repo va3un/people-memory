@@ -16,7 +16,7 @@ export async function requestPersistentStorage(): Promise<StorageStatus> {
     return {
       state: 'unsupported',
       persisted: false,
-      message: 'This browser cannot promise to keep the data. Backup is not available yet. Use fictional data only.',
+      message: 'This browser cannot promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   }
 
@@ -27,14 +27,14 @@ export async function requestPersistentStorage(): Promise<StorageStatus> {
       state: persisted ? 'granted' : 'denied',
       persisted,
       message: persisted
-        ? 'Protected against automatic storage cleanup. Clearing site data or losing this device still loses these records. Backup is not available yet. Use fictional data only.'
-        : 'The browser may clear this app data. Backup is not available yet. Use fictional data only.',
+        ? 'Protected against automatic storage cleanup. Clearing site data or losing this device still loses these records. Keep a verified JSON backup from Settings. Use fictional data for testing.'
+        : 'The browser may clear this app data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   } catch {
     return {
       state: 'denied',
       persisted: false,
-      message: 'The browser would not promise to keep the data. Backup is not available yet. Use fictional data only.',
+      message: 'The browser would not promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   }
 }
@@ -45,7 +45,7 @@ export async function getStorageStatus(): Promise<StorageStatus> {
     return {
       state: 'unsupported',
       persisted: false,
-      message: 'This browser cannot promise to keep the data. Backup is not available yet. Use fictional data only.',
+      message: 'This browser cannot promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   }
   try {
@@ -54,14 +54,14 @@ export async function getStorageStatus(): Promise<StorageStatus> {
       state: persisted ? 'granted' : 'denied',
       persisted,
       message: persisted
-        ? 'Protected against automatic storage cleanup. Clearing site data or losing this device still loses these records. Backup is not available yet. Use fictional data only.'
-        : 'The browser may clear this app data. Backup is not available yet. Use fictional data only.',
+        ? 'Protected against automatic storage cleanup. Clearing site data or losing this device still loses these records. Keep a verified JSON backup from Settings. Use fictional data for testing.'
+        : 'The browser may clear this app data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   } catch {
     return {
       state: 'denied',
       persisted: false,
-      message: 'The browser would not promise to keep the data. Backup is not available yet. Use fictional data only.',
+      message: 'The browser would not promise to keep the data. Keep a verified JSON backup from Settings. Use fictional data for testing.',
     }
   }
 }
