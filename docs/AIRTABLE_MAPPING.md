@@ -2,7 +2,7 @@
 
 This is a paper exercise only. Nothing here imports real data.
 All column names below are made up, so nothing private sits in this public repository.
-The purpose is to find the gaps early, before the real import in Phase 11.
+Historical Phase 2 exercise only. On 29 October 2026 Varun intentionally skipped Phase 11 because the dataset is small. The mappings and questions below are archived observations, not current implementation or acceptance requirements. Generic JSON backup/import and all other safety checks remain required.
 
 ## 1. The made up Airtable tables
 
@@ -41,7 +41,7 @@ The old Airtable base was said to have these tables. The names here are invented
 | Photos | Person ID | photos | person_id | |
 | Photos | Attachment | photos | blob | Airtable attachment URL. It can expire. |
 
-## 2. Questions to answer before Phase 11
+## 2. Historical questions from the Phase 2 exercise
 
 1. Do all four of Organizations, Groups, School and Society still exist in the export? If some were only views of one table, the import screen must not create the same context twice.
 2. Are the "Context ID" values the same kind of value as the "Person ID" values? If the old base used Airtable record numbers, they will not match the UUIDs in the export.
@@ -61,4 +61,4 @@ The old Airtable base was said to have these tables. The names here are invented
 
 ## 4. What stays out of this repository
 
-No CSV exports, no photos and no real names. The real import happens in Phase 11, on Varun's own machine, and the original export is kept untouched until the restore has been checked.
+No CSV exports, no photos and no real names. Phase 11 is intentionally skipped; this document does not authorize a real-data import. Public-repository privacy and generic backup/restore safety requirements remain unchanged.

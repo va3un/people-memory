@@ -4,7 +4,7 @@ Keep one copy in the ChatGPT project, one at `D:\Dropbox\People Memory App\docs\
 What changed from version 2:
 Retained Claude's core vision, tech stack, eleven core product milestones, one-phase Cline workflow, and Phase 0 manual setup. Phase numbering 0 through 13 is unchanged.
 Tightened privacy: distinguish no app account from third-party sign-in; disclose unencrypted local and Dropbox storage, and require explicit consent before sharing passages with any external chatbot or API.
-Added real-data Airtable mapping rehearsal with redacted or fictional rows before Phase 11, without advancing the full migration.
+Approved scope update (29 October 2026): Phase 11 is intentionally skipped because the dataset is small. Airtable-specific importer, mapping rehearsal and migration acceptance requirements are removed; generic JSON backup/import and all other safety/manual acceptance requirements remain unchanged.
 Added no-loss sync safeguards: deterministic conflict handling, protected recovery copies, account/device tests, and no silent deletion of conflicting edits.
 Added early persistent-storage request and backup reminders; support import/export as disaster recovery, not as an implicit guarantee of permanent browser data.
 Fixed first-run timing, relationship wording, surname assumptions, safer import/undo behavior, PWA update behavior, and test acceptance criteria.
@@ -23,8 +23,8 @@ Cline reads this file, `.clinerules` and `PROGRESS.md`, then does the whole phas
 Cline commits after each finished task, runs the tests, pushes to GitHub, and checks that the deploy worked.
 Cline writes a report at the top of `PROGRESS.md` with four short parts: What was done, Please test (five checks at most, with exact taps), Decisions I made, Need from you (only if blocked).
 Approved coding-first testing workflow (29 October 2026): finish coding before manual acceptance testing. Automated tests, typecheck, production build and independent pull-request review remain required for every phase. Varun authorizes the next coding phase in a new chat after those checks and review.
-Defer all manual acceptance tests until coding is complete, including routine phone/UI checks and critical backup/restore, Dropbox sync and Airtable migration tests. Record every deferred check in `PROGRESS.md` as a mandatory release blocker, never as a passed test. Deferral does not block coding-phase progression after its automated checks and independent review.
-All deferred manual tests must pass before release. This includes successful backup restoration, the required actual-service multi-device sync and conflict/recovery checks, and Airtable real-data migration verification and safeguards in the applicable phases. Automated mocks alone do not replace these release checks. Use fictional data only until the real-data safety checks pass; do not import or expose personal records to complete coding.
+Defer all manual acceptance tests until coding is complete, including routine phone/UI checks and critical backup/restore and Dropbox sync tests. Record every deferred check in `PROGRESS.md` as a mandatory release blocker, never as a passed test. Deferral does not block coding-phase progression after its automated checks and independent review.
+All deferred manual tests must pass before release. This includes successful backup restoration, the required actual-service multi-device sync and conflict/recovery checks, and all other applicable real-data safety checks. Automated mocks alone do not replace these release checks. Use fictional data only until the real-data safety checks pass; do not import or expose personal records to complete coding.
 Deferral changes only the timing of manual acceptance. All other roadmap requirements, data-safety safeguards, actual-service verification and review requirements remain unchanged. Stop and report dependencies that genuinely require Varun's action.
 1.3 When ChatGPT is used
 Kickoff, once.
@@ -413,7 +413,7 @@ Exports never include the API key.
 Suggested habit: save the monthly export into `D:\Dropbox\People Memory App\backups\`.
 ---
 14. Build phases
-Each phase has Tasks, Cline self-checks, and Phone checks. Test with fictional data until the Phase 11 import has been reviewed. Do not ask Varun to clear real data as a casual phone check. Cline works through the tasks in order, commits after each, and ticks it off in `PROGRESS.md`. Apply the coding-first testing workflow in section 1.2: automated tests, typecheck, production build and independent PR review are required for every phase. Defer all manual Phone checks, including critical backup/restore, Dropbox sync and Airtable migration acceptance, until coding is complete; retain them as mandatory release blockers and never mark unverified checks as passed. Use fictional data only until real-data safety checks pass. All deferred manual checks must pass before release. Do not start a phase until the previous phase has passed its required automated checks and independent review and Varun authorizes progression.
+Each phase has Tasks, Cline self-checks, and Phone checks. Test with fictional data until real-data safety checks pass. Do not ask Varun to clear real data as a casual phone check. Cline works through the tasks in order, commits after each, and ticks it off in `PROGRESS.md`. Apply the coding-first testing workflow in section 1.2: automated tests, typecheck, production build and independent PR review are required for every phase. Defer all manual Phone checks, including critical backup/restore, Dropbox sync acceptance, until coding is complete; retain them as mandatory release blockers and never mark unverified checks as passed. Use fictional data only until real-data safety checks pass. All deferred manual checks must pass before release. Do not start a phase until the previous phase has passed its required automated checks and independent review and Varun authorizes progression.
 Phase 0: Accounts and workspace (Varun, guided by ChatGPT one step at a time)
 Create a GitHub account if needed. Do not add a payment method. Already completed.
 Create the public repository `people-memory` with a README. Already completed.
@@ -447,7 +447,7 @@ Typed helpers to create, update and soft-delete each type. Updates always refres
 Settings (developer section): "Load sample data" using section 16.1, "Delete all data" with confirmation, and counts of records. Mark dangerous tools "Test data only" and prevent one-tap wiping of real records. Request and display persistent storage permission here, not only in Phase 12.
 Unit tests for create, update, soft delete.
 Self-checks: all tests pass.
-Phone checks: load fictional sample data, close the app, reopen, and the counts are still there. Check persistent storage status and document fictional Airtable field mapping requirements.
+Phone checks: load fictional sample data, close the app, reopen, and the counts are still there. Check persistent storage status.
 Phase 3: People, photos and quick add
 Tasks:
 Quick add form (11.3 item 3) with the camera or gallery photo picker and image shrinking.
@@ -508,10 +508,8 @@ Phone checks: add a fictional person on the phone, tap Sync now on the PC, and t
 Phase 10: Polish and Windows layout
 Tasks: walk through section 11 line by line and fix tap sizes, dark mode, empty states, motion, and spacing; build the two-column wide layout; review the `#/design` page.
 Phone checks: use the app for a full day and write down a short list of irritations. Paste screenshots into ChatGPT for a design review against section 11.
-Phase 11: Import from Airtable
-Earlier dependency: In Phase 2, Cline documents an example mapping using fictional Airtable column names and redacted headers if available, noting any unmapped relationship direction or attachment fields in `PROGRESS.md`. This is a schema rehearsal, not a real data import; resolve incompatible requirements before building full import.
-Varun exports each Airtable table as a CSV. Tasks: an import screen that maps columns, shows a preview, flags possible duplicates, and imports. Organizations, Groups, School and Society columns become Contexts with the right `kind`. For Relationships rows, show a preview with a "flip direction" switch, and ask Varun to check one known row. Airtable attachment URLs may expire, so download the actual images while accessible rather than assuming the URLs will remain usable. Never place exports or photos in the public repository. Keep an untouched original export until restore is verified.
-Done when: Varun's real data is in the app and the example questions in section 2 get right answers.
+Phase 11: Airtable-specific import — intentionally skipped
+Approved by Varun on 29 October 2026 because the dataset is small. This phase is intentionally skipped, not completed. No Airtable-specific importer, field-mapping rehearsal or Airtable migration acceptance is required. Generic JSON backup/import/export, existing functionality, real-data safety gates and every other mandatory safety/manual acceptance check remain unchanged.
 Phase 12: Hardening and version 1.0
 Tasks:
 Confirm persistent storage has been requested (beginning in Phase 2 once data exists) and show the result in Settings; if denied, show a clear backup reminder.
@@ -607,7 +605,6 @@ No.	Scenario	Expected
 26	Clear browser storage before first sync	App explains that unsynced data is not recoverable
 27	AI capture cancelled before external request	No passage or directory data leaves the app
 28	App offline after first load, with provider unavailable	Local add, search, browse, backup still function
-29	Initial fake Airtable mapping rehearsal	Any missing fields or ambiguous relationship directions are documented before Phase 11
 16.3 Golden examples for Smart capture tests
 Example 1 (the Sanket passage in section 10). Expected default result: people Sanket Bobhate (male, friend), Tarika Gupta (female, surname unchanged), Kiara (female, surname unknown); contexts resolved from Me to Fr. Agnel School and ICLES College; memberships Sanket as Student in both; relationships Sanket spouse of Tarika, Kiara child of Sanket, Kiara child of Tarika, Sanket friend of ME.
 Example 2: "Met Rahul Patil at the society meeting, he works at Lionbridge." Expected: existing Rahul matched as a possible match, no duplicate, society context via Me if Varun has one society.
@@ -637,7 +634,7 @@ Smart capture	Copy and paste mode first, automatic mode off until Varun adds a k
 Wife's surname rule	Off. Optional opt-in suggestion with assumed flags and explicit review
 Code visibility	Public repository, no personal data in it
 AI provider for automatic mode	Gemini free tier or OpenRouter free model, Varun's choice in Phase 8
-Airtable import	Phase 11
+Airtable-specific importer	Phase 11 intentionally skipped (approved small-dataset decision, 29 October 2026)
 ---
 Appendix A: Bolt.new prompt (Phase 13)
 ```text

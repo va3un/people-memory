@@ -62,6 +62,6 @@ backup/restore/sync/browser regressions remain necessary; visual checks alone ca
 - Complete actual free-provider and Dropbox service/multi-device conflict/photo/retry/recovery
   checks. Public App-key setup and private authorization are still unavailable here. Mocked network
   results do not establish live service success; live sync remains disabled until configured.
-- Future Airtable migration/real-data safety checks remain deferred blockers. Phase 11 has not
-  started. Use fictional data only until the real-data safety checks pass. Local storage, exports
+- Phase 11 is intentionally skipped under the approved small-dataset decision; Airtable-specific
+  migration checks no longer apply. All other real-data safety checks remain release blockers. Use fictional data only until the real-data safety checks pass. Local storage, exports
   and Dropbox content remain unencrypted; working offline alone is not a verified backup.

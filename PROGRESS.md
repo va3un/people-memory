@@ -1,4 +1,17 @@
 # Latest report
+Phase 11 is intentionally skipped, not completed, by Varun's approved small-dataset decision of 29 October 2026. Phase 12 coding and verification are in progress on `feature/phase-12`; final acceptance is not claimed.
+
+What was done
+- Removed only Airtable-specific importer, mapping rehearsal and migration acceptance requirements from the roadmap. The prior fictional mapping document is explicitly archived. Earlier reports below retain historical wording; their Airtable-only requirements are superseded by this approved decision.
+- Generic JSON backup/import/export and all existing functionality remain required. All other mandatory safety, manual/device and actual-service checks remain release blockers. No real data, deployment, GitHub Release or v1.0.0 tag is authorized by this coding pass.
+
+Please test
+- All non-Airtable deferred manual checks remain mandatory release blockers, not passed tests; the final Phase 12 report will list the exact paths after automated verification.
+
+Decisions I made
+- Kept Phase 11's number and labelled it intentionally skipped; no importer is implemented and the phase is not marked complete. Kept Phase 12's release/manual tasks in the roadmap for later explicitly approved release work.
+
+# Previous report: Phase 10 implementation
 Phase 10 implementation, 29 October 2026, on `feature/phase-10`. Coding and automated verification complete; independent PR review and all deferred manual acceptance remain mandatory release blockers. No manual test is newly marked passed. Phase 11 has not started.
 
 What was done
