@@ -1,4 +1,4 @@
-// Full backups remain visible while sync is unavailable; only a verified saved JSON file resets the reminder.
+// Full backups stay visible even with Dropbox connected; only a verified saved JSON file resets the reminder.
 import { Card } from '../ui/Card'
 import { ExportPanel } from '../backup/ExportPanel'
 import { ImportPanel } from '../backup/ImportPanel'
@@ -16,8 +16,8 @@ export function BackupCard() {
           API keys and Dropbox tokens are never exported or imported.
         </p>
         <p>
-          Sync is not configured. A local browser database is not a backup; keep a downloaded JSON
-          file outside this browser.
+          A local browser database is not a downloaded backup. Keep a verified JSON file outside
+          this browser, even if Dropbox is connected.
         </p>
         {error && <p role="alert">Could not read backup status.</p>}
         {status === undefined && !error && <p role="status">Checking backup status…</p>}

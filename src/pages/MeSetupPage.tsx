@@ -1,5 +1,6 @@
 // First launch collects a fictional Me profile and optional contexts without resetting any data.
 import { useRef, useState } from 'react'
+import { SyncSettings } from '../sync/SyncSettings'
 import { ImportPanel } from '../components/backup/ImportPanel'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
@@ -43,7 +44,8 @@ export function MeSetupPage() {
       </p>
       <p className="mt-3 text-muted">
         Use a fictional name and fictional contexts for testing. Data is unencrypted on this device;
-        JSON backups are available in Settings after setup; sync is not configured.
+        JSON backups are available in Settings after setup. Optional Dropbox recovery below requires
+        Appendix B setup.
       </p>
       <form
         className="mt-5 space-y-4"
@@ -105,6 +107,16 @@ export function MeSetupPage() {
           testing.
         </p>
         <ImportPanel />
+      </details>
+      <details className="mt-6 rounded-2xl border p-4">
+        <summary className="min-h-12 cursor-pointer font-semibold">
+          Connect Dropbox for recovery
+        </summary>
+        <p>
+          On a new device, restore the existing Me profile and directory before creating another Me.
+          Appendix B setup is required.
+        </p>
+        <SyncSettings />
       </details>
       {pickerOpen && (
         <ContextPicker
