@@ -128,6 +128,9 @@ with sync_playwright() as p:
     expect(page.get_by_role('link', name='Fictional School', exact=True)).to_be_visible()
     assert len(rows('memberships')) == 4
     page.get_by_role('link', name='Browse', exact=True).click()
+    # Dismiss save notifications as a user can; hovering an overlay pauses its timeout.
+    for close in page.get_by_role('button', name='Close toast', exact=True).all():
+        if close.is_visible(): close.click()
     page.get_by_role('tab', name='Categories', exact=True).click()
     page.get_by_role('link', name='Friend 1 person', exact=False).click()
     expect(page.get_by_role('heading', name='Friend', exact=True)).to_be_visible()
