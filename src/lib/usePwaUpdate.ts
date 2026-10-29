@@ -32,7 +32,9 @@ export function usePwaUpdate() {
       description: 'A new version of People is ready.',
       action: {
         label: 'Refresh',
-        onClick: () => {
+        onClick: (event) => {
+          // Keep the offer available if the user retains a draft or activation fails.
+          event?.preventDefault()
           if (
             document.querySelector('[data-unsaved]') &&
             !window.confirm('Refresh and discard your unsaved changes?')

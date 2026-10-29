@@ -24,11 +24,14 @@ it('keeps a waiting update inactive when the user retains an unsaved draft', asy
   await act(async () => mocks.register.mock.calls[0][0].onNeedRefresh())
   expect(mocks.toast.mock.calls.at(-1)![0].duration).toBe(Infinity)
   const action = mocks.toast.mock.calls.at(-1)![0].action
-  action.onClick()
+  const click = { preventDefault: vi.fn() }
+  action.onClick(click)
+  expect(click.preventDefault).toHaveBeenCalledOnce()
   expect(confirm).toHaveBeenCalled()
   expect(mocks.update).not.toHaveBeenCalled()
   confirm.mockReturnValue(true)
-  action.onClick()
+  action.onClick(click)
+  expect(click.preventDefault).toHaveBeenCalledTimes(2)
   expect(mocks.update).toHaveBeenCalledWith(true)
   act(() => root.unmount())
   container.remove()

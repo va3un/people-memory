@@ -2,7 +2,7 @@ import { Toaster as SonnerToaster, toast } from 'sonner'
 
 export type ToastAction = {
   label: string
-  onClick: () => void
+  onClick: (event?: { preventDefault(): void }) => void
 }
 
 export type ToastProps = {
