@@ -1,6 +1,6 @@
 # Smart Capture copy/paste mode (Phase 7)
 
-Use fictional passages only until the real-data safety checks pass. Smart Capture is the default Add screen; Use the form instead opens the existing quick form. Add person here from a context still opens that form with its context selected. No provider, API key, account, automatic request or paid tool is needed by the app.
+Use fictional passages only until the real-data safety checks pass. Smart Capture is the default Add screen; Use the form instead opens the existing quick form. Add person here from a context still opens that form with its context selected. Copy/paste mode needs no provider, API key, account, automatic request or paid tool. [Optional automatic capture](AUTOMATIC_CAPTURE.md) is a separate, default-off Phase 8 feature.
 
 ## Draft and review
 
@@ -30,4 +30,4 @@ Full JSON backup/restore preserves capture history and its Undo snapshots. Impor
 
 Automated tests cover the roadmap's five golden examples and safety cases; production Chromium checks exercise clipboard/privacy, real review/edit/skip, late-save failure and retry, live search, persistent safe/conflicting Undo, surname opt-in/revert and offline operation. All fixtures are fictional. Earlier Phase 3–6 browser suites remain required regressions.
 
-Under the approved coding-first workflow, independent PR review is required per phase. All manual acceptance tests wait until coding is complete and remain mandatory release blockers. This includes an actual chatbot copy/paste Sanket rehearsal, phone UI/offline checks, critical backup/restore, Dropbox sync and Airtable migration safeguards. Automation does not mark these manual checks as passed. No personal data may be used until the real-data safety checks pass. Phase 8 automatic capture and deployment are not part of this change.
+Under the approved coding-first workflow, independent PR review is required per phase. All manual acceptance tests wait until coding is complete and remain mandatory release blockers. This includes an actual chatbot copy/paste Sanket rehearsal, phone UI/offline checks, critical backup/restore, Dropbox sync and Airtable migration safeguards. Automation does not mark these manual checks as passed. No personal data may be used until the real-data safety checks pass. Phase 8 adds optional automatic capture through the same review/save/Undo pipeline; its live verification is incomplete and documented separately. Deployment is not part of this work.

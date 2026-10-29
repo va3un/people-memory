@@ -61,8 +61,8 @@ export function CapturePage() {
     >
       <h1 className="page-title">Smart capture</h1>
       <p className="mt-3">
-        Copy and paste works without a key. Optional automatic mode is configured in Settings. Use fictional data only. Nothing is saved until you review and tap
-        Save. No API key is needed.
+        Copy and paste works without a key. Optional automatic mode is configured in Settings. Use
+        fictional data only. Nothing is saved until you review and tap Save. No API key is needed.
       </p>
       <a className="flex min-h-12 items-center text-accent" href="#/add?form=1">
         Use the form instead
@@ -77,7 +77,24 @@ export function CapturePage() {
           {message}
         </p>
       )}
-      {!review && <AutomaticAction purpose="draft" passage={passage} disabled={busy} onBusy={setAutomaticBusy} onDraft={(result, text) => {setAnswer(text);setReview(result);setTimeout(() => headingRef.current?.focus(),0)}} onFallback={() => setMessage('Use Copy prompt, then paste the chatbot answer and tap Read it. No API key is required.')} />}
+      {!review && (
+        <AutomaticAction
+          purpose="draft"
+          passage={passage}
+          disabled={busy}
+          onBusy={setAutomaticBusy}
+          onDraft={(result, text) => {
+            setAnswer(text)
+            setReview(result)
+            setTimeout(() => headingRef.current?.focus(), 0)
+          }}
+          onFallback={() =>
+            setMessage(
+              'Use Copy prompt, then paste the chatbot answer and tap Read it. No API key is required.',
+            )
+          }
+        />
+      )}
       <fieldset disabled={busy || automaticBusy} className="min-w-0 space-y-4 mt-3">
         {!review && (
           <>
