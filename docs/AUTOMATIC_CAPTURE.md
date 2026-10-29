@@ -30,7 +30,7 @@ Quota/credit-required responses offer waiting or copy/paste, never upgrading. Mo
 
 `npm run typecheck`, `npm test`, `npm run build` and browser suites for Phases 3–8 use fictional fixtures only. The Phase 8 script intercepts provider requests; it checks both wire formats, consent cancellation with zero requests, no-key/off behavior, no directory/key in payloads, quota/bad-JSON/blocked errors, no retries, shared review/save, cancellation/late answers, cross-tab revocation and offline copy/paste. These are mocked-provider tests, not a successful live call.
 
-All manual acceptance remains deferred until coding is complete and blocks release: actual free-key/model/CORS verification with fictional Sanket text, one-tap review/save/Undo, no-key and cancelled-consent checks, physical-phone UI/offline behavior, critical backup/restore, later Dropbox sync and Airtable migration safeguards. Use fictional data until real-data safety checks pass. Phase 9 and deployment are not part of this work.
+All manual acceptance remains deferred until coding is complete and blocks release: actual free-key/model/CORS verification with fictional Sanket text, one-tap review/save/Undo, no-key and cancelled-consent checks, physical-phone UI/offline behavior, critical backup/restore, later Dropbox sync and Airtable migration safeguards. Use fictional data until real-data safety checks pass. Phase 9 adds separate optional Dropbox sync/recovery; its actual-service checks are also unverified release blockers. Deployment is not part of this work.
 
 ## Official references checked 29 October 2026
 

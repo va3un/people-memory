@@ -1,6 +1,6 @@
 # Backup and recovery (Phase 6)
 
-Use fictional data until the real-data migration phase has been reviewed. Browser storage and downloaded exports are unencrypted. Keep downloaded files private and outside the browser. Nothing is uploaded by these tools. Dropbox sync is not implemented.
+Use fictional data until the real-data migration phase has been reviewed. Browser storage and downloaded exports are unencrypted. Keep downloaded files private and outside the browser. Nothing is uploaded by these tools. Optional Dropbox sync is implemented in Phase 9 but disabled until configured/authorized; actual-service verification remains a release blocker. See [sync recovery](DROPBOX_SYNC.md).
 
 ## Save a full backup
 
